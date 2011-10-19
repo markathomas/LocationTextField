@@ -21,6 +21,9 @@ package org.vaadin.addons.locationtextfield;
 
 import java.io.Serializable;
 
+/**
+ * POJO for the constituent parts of a geocoded address
+ */
 public class GeocodedLocation implements Serializable {
 
     private String originalAddress;
@@ -37,6 +40,9 @@ public class GeocodedLocation implements Serializable {
     private boolean ambiguous;
     private LocationType type;
 
+    /**
+     * This should be the original input address to the {@link LocationProvider}
+     */
     public String getOriginalAddress() {
         return originalAddress;
     }
@@ -44,6 +50,9 @@ public class GeocodedLocation implements Serializable {
         this.originalAddress = originalAddress;
     }
 
+    /**
+     * This should be the full geocoded address
+     */
     public String getGeocodedAddress() {
         return geocodedAddress;
     }
@@ -58,6 +67,9 @@ public class GeocodedLocation implements Serializable {
         this.streetNumber = streetNumber;
     }
 
+    /**
+     * Same as street name for U.S.
+     */
     public String getRoute() {
         return route;
     }
@@ -65,6 +77,9 @@ public class GeocodedLocation implements Serializable {
         this.route = route;
     }
 
+    /**
+     * Same as city for U.S.
+     */
     public String getLocality() {
         return locality;
     }
@@ -72,6 +87,9 @@ public class GeocodedLocation implements Serializable {
         this.locality = locality;
     }
 
+    /**
+     * Same as state for U.S.
+     */
     public String getAdministrativeAreaLevel1() {
         return administrativeAreaLevel1;
     }
@@ -79,6 +97,9 @@ public class GeocodedLocation implements Serializable {
         this.administrativeAreaLevel1 = administrativeAreaLevel1;
     }
 
+    /**
+     * Same as county for U.S.
+     */
     public String getAdministrativeAreaLevel2() {
         return administrativeAreaLevel2;
     }
@@ -93,6 +114,9 @@ public class GeocodedLocation implements Serializable {
         this.country = country;
     }
 
+    /**
+     * Same as zip code for U.S.
+     */
     public String getPostalCode() {
         return postalCode;
     }
@@ -114,6 +138,9 @@ public class GeocodedLocation implements Serializable {
         this.lat = lat;
     }
 
+    /**
+     * Should be true if the {@link LocationProvider} returned more than one result for the input address
+     */
     public boolean isAmbiguous() {
         return ambiguous;
     }

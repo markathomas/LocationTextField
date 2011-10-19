@@ -29,9 +29,22 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class OpenStreetMapGeocoder extends URLConnectionGeocoder {
+/**
+ * {@link LocationProvider} which uses OpenStreetMap
+ */
+public final class OpenStreetMapGeocoder extends URLConnectionGeocoder {
 
-    public static final String BASE_URL = "http://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=";
+    private static final String BASE_URL = "http://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=";
+
+    private static final OpenStreetMapGeocoder INSTANCE = new OpenStreetMapGeocoder();
+
+    private OpenStreetMapGeocoder() {
+        // nuthin'
+    }
+
+    public static OpenStreetMapGeocoder getInstance() {
+        return INSTANCE;
+    }
 
     protected String getURL(String address) throws UnsupportedEncodingException {
         return BASE_URL + URLEncoder.encode(address, "UTF-8");

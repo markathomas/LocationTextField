@@ -22,6 +22,9 @@ package org.vaadin.addons.locationtextfield;
 import java.io.Serializable;
 import java.util.Collection;
 
+/**
+ * Inteface providing {@link GeocodedLocation}s based on an address
+ */
 public interface LocationProvider extends Serializable {
     Collection<GeocodedLocation> geocode(String address) throws GeocodingException;
 }

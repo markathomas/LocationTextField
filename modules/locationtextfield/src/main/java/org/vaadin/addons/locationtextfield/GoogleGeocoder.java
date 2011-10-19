@@ -28,16 +28,28 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
+ * {@link LocationProvider} which uses Google.
+ *
  * This class can only be used when used in conjunction with Google Maps API
  * See http://code.google.com/apis/maps/documentation/geocoding/ for details
  */
-public class GoogleGeocoder extends URLConnectionGeocoder {
+public final class GoogleGeocoder extends URLConnectionGeocoder {
 
     private static final String URL = "maps.googleapis.com/maps/api/geocode/json";
     private static final String INSECURE_URL = "http://" + URL;
     private static final String SECURE_URL = "https://" + URL;
 
+    private static final GoogleGeocoder INSTANCE = new GoogleGeocoder();
+
     private boolean useSecureConnection;
+
+    private GoogleGeocoder() {
+        // nuthin'
+    }
+
+    public static GoogleGeocoder getInstance() {
+        return INSTANCE;
+    }
 
     protected String getURL(String address) throws UnsupportedEncodingException {
         return (this.useSecureConnection ? SECURE_URL : INSECURE_URL) + "?address=" + URLEncoder.encode(address, "UTF-8");

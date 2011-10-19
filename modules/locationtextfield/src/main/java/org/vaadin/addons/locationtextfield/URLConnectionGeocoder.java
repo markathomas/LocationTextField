@@ -29,6 +29,9 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+/**
+ * {@link LocationProvider} shell implementation that fetches data from an URL and delegates to implementing class to decode
+ */
 public abstract class URLConnectionGeocoder implements LocationProvider {
 
     public Collection<GeocodedLocation> geocode(String address) throws GeocodingException {
@@ -59,12 +62,28 @@ public abstract class URLConnectionGeocoder implements LocationProvider {
         return locations;
     }
 
+    /**
+     * Encoding the response stream is to be expected.  Default is UTF-8.  Override in subclass as necessary.
+     */
     protected String getEncoding() {
         return "UTF-8";
     }
 
+    /**
+     * Retrieve the full URL to fetch
+     * @param address input address
+     * @return full URL
+     * @throws UnsupportedEncodingException if subclass uses {@link java.net.URLEncoder} and it fails
+     */
     protected abstract String getURL(String address) throws UnsupportedEncodingException;
 
+    /**
+     * Creates {@link GeocodedLocation} objects from response stream
+     * @param address input address
+     * @param input response stream as string
+     * @return collection of {@link GeocodedLocation} objects
+     * @throws GeocodingException
+     */
     protected abstract Collection<? extends GeocodedLocation> createLocations(String address, String input)
       throws GeocodingException;
 }

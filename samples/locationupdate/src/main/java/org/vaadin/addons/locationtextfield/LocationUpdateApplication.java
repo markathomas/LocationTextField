@@ -35,7 +35,7 @@ public class LocationUpdateApplication extends Application {
         vl.setHeight("250px");
         vl.setMargin(true);
 
-        final LocationTextField ltf = new LocationTextField(new OpenStreetMapGeocoder(), "Address: ");
+        final LocationTextField ltf = new LocationTextField(OpenStreetMapGeocoder.getInstance(), "Address: ");
         ltf.setWidth("100%");
         vl.addComponent(ltf);
 
