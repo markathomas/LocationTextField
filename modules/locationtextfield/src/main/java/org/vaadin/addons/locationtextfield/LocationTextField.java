@@ -23,7 +23,6 @@ import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.FieldEvents;
 import com.vaadin.terminal.PaintException;
 import com.vaadin.terminal.PaintTarget;
-import com.vaadin.terminal.gwt.client.ui.VTextField;
 import com.vaadin.ui.AbstractTextField;
 import com.vaadin.ui.ClientWidget;
 import com.vaadin.ui.Select;
@@ -48,11 +47,6 @@ public class LocationTextField extends Select {
     private String nullRepresentation = "";
 
     /**
-     * The prompt to display in an empty field. Null when disabled.
-     */
-    private String inputPrompt = null;
-
-    /**
      * The text content when the last messages to the server was sent.
      */
     private String lastKnownTextContent;
@@ -70,17 +64,12 @@ public class LocationTextField extends Select {
     private int textChangeEventTimeout = DEFAULT_TEXTCHANGE_TIMEOUT;
 
     /**
-     * Flag used to determine whether we are currently handling a state change
-     * triggered by a user. Used to properly fire text change event before value
-     * change event triggered by the client side.
-     */
-    private boolean changingVariables;
-
-    /**
      * Track whether the value on the server has actually changed to avoid
      * updating the text in the input element on every repaint
      */
     private boolean localValueChanged = true;
+
+    private boolean autoSelectOnSingleResult;
 
     public LocationTextField(LocationProvider locationProvider) {
         this(locationProvider, "");
@@ -124,8 +113,8 @@ public class LocationTextField extends Select {
         // nothing
     }
 
-    @Deprecated
     @Override
+    @Deprecated
     public void setMultiSelect(boolean multiSelect) {
         // nothing
     }
@@ -142,16 +131,14 @@ public class LocationTextField extends Select {
     public void paintContent(PaintTarget target) throws PaintException {
         super.paintContent(target);
 
-        if (getInputPrompt() != null) {
-            target.addAttribute("prompt", getInputPrompt());
-        }
-
         if (localValueChanged) {
-            target.addAttribute(VTextField.ATTR_TEXT_CHANGED, true);
+            target.addAttribute(VLocationTextField.ATTR_TEXT_CHANGED, true);
             localValueChanged = false;
         }
+         // TODO: get paging to actually work
+        target.addVariable(this, "pagelength", "100");
 
-        target.addVariable(this, "filter", getCurrentTextContent());
+        target.addVariable(this, "filter", this.lastKnownTextContent);
 
         target.addAttribute(VLocationTextField.ATTR_TEXTCHANGE_EVENTMODE, getTextChangeEventMode().toString());
         target.addAttribute(VLocationTextField.ATTR_TEXTCHANGE_TIMEOUT, getTextChangeTimeout());
@@ -175,72 +162,36 @@ public class LocationTextField extends Select {
     }
 
     @Override
-    protected void setInternalValue(Object newValue) {
-        if (changingVariables && !textChangeEventPending) {
-            /*
-             * Fire a "simulated" text change event before value change event if
-             * change is coming from the client side.
-             *
-             * Iff there is both value change and textChangeEvent in same
-             * variable burst, it is a text field in non immediate mode and the
-             * text change event "flushed" queued value change event. In this
-             * case textChangeEventPending flag is already on and text change
-             * event will be fired after the value change event.
-             */
-            GeocodedLocation newLoc = (GeocodedLocation)(newValue);
-            if (newLoc == null && lastKnownTextContent != null && !lastKnownTextContent.equals(getNullRepresentation())) {
-                // Value was changed from something to null representation
-                lastKnownTextContent = "";
-                textChangeEventPending = true;
-            } else if (newLoc != null && !newLoc.getOriginalAddress().equals(lastKnownTextContent)
-              && !newLoc.getGeocodedAddress().equals(lastKnownTextContent)) {
-                // Value was changed to something else than null representation
-                lastKnownTextContent = newLoc.getOriginalAddress();
-                textChangeEventPending = true;
-            }
-
-            firePendingTextChangeEvent();
-        }
-        super.setInternalValue(newValue);
-    }
-
-    @Override
     public void changeVariables(Object source, Map<String, Object> variables) {
-        changingVariables = true;
+        super.changeVariables(source, variables);
 
-        try {
-            super.changeVariables(source, variables);
+        // Sets the text
+        if (variables.containsKey("filter")) {
 
-            // Sets the text
-            if (variables.containsKey("filter")) {
+            // Only do the setting if the string representation of the value
+            // has been updated
+            String newValue = ("" + variables.get("filter")).trim();
 
-                // Only do the setting if the string representation of the value
-                // has been updated
-                String newValue = "" + variables.get("filter");
-
-                if (!newValue.equals(lastKnownTextContent)) {
+            if (!newValue.equals(lastKnownTextContent) && !"".equals(newValue)) {
+                GeocodedLocation newLocation;
+                synchronized (this.locations) {
+                    newLocation = this.locations.get(newValue); // this is the geocoded address if a match is found
+                }
+                if (newLocation != null) {
+                    this.select(newLocation);
+                } else {
                     lastKnownTextContent = newValue;
-                    GeocodedLocation newLocation;
-                    synchronized (this.locations) {
-                        newLocation = this.locations.get(newValue); // this is the geocoded address if a match is found
-                    }
-                    if (newLocation != null) {
-                        this.select(newLocation);
-                    } else {
-                        textChangeEventPending = true;
-                    }
+                    textChangeEventPending = true;
                 }
             }
-            firePendingTextChangeEvent();
+        }
+        firePendingTextChangeEvent();
 
-            if (variables.containsKey(FieldEvents.FocusEvent.EVENT_ID)) {
-                fireEvent(new FieldEvents.FocusEvent(this));
-            }
-            if (variables.containsKey(FieldEvents.BlurEvent.EVENT_ID)) {
-                fireEvent(new FieldEvents.BlurEvent(this));
-            }
-        } finally {
-            changingVariables = false;
+        if (variables.containsKey(FieldEvents.FocusEvent.EVENT_ID)) {
+            fireEvent(new FieldEvents.FocusEvent(this));
+        }
+        if (variables.containsKey(FieldEvents.BlurEvent.EVENT_ID)) {
+            fireEvent(new FieldEvents.BlurEvent(this));
         }
     }
 
@@ -261,9 +212,19 @@ public class LocationTextField extends Select {
         firePendingTextChangeEvent();
     }
 
+    /**
+     * Whether or not to auto-select a location when there is only one result
+     */
+    public boolean isAutoSelectOnSingleResult() {
+        return autoSelectOnSingleResult;
+    }
+    public void setAutoSelectOnSingleResult(boolean autoSelectOnSingleResult) {
+        this.autoSelectOnSingleResult = autoSelectOnSingleResult;
+    }
+
     private void update() {
         try {
-            String addr = this.getCurrentTextContent();
+            String addr = this.lastKnownTextContent;
             Collection<GeocodedLocation> locs;
             if (addr != null && !"".equals(addr.trim()))
                 locs = this.locationProvider.geocode(addr.trim());
@@ -276,7 +237,7 @@ public class LocationTextField extends Select {
                     this.locations.put(loc.getGeocodedAddress(), loc);
                     this.container.addBean(loc);
                 }
-                if (this.locations.size() == 1)
+                if (this.locations.size() == 1 && isAutoSelectOnSingleResult())
                     this.select(this.locations.values().iterator().next());
             }
             requestRepaint();
@@ -328,54 +289,9 @@ public class LocationTextField extends Select {
         requestRepaint();
     }
 
-    /**
-     * Gets the current (or the last known) text content in the field.
-     * <p>
-     * Note the text returned by this method is not necessary the same that is
-     * returned by the {@link #getValue()} method. The value is updated when the
-     * terminal fires a value change event via e.g. blurring the field or by
-     * pressing enter. The value returned by this method is updated also on
-     * {@link com.vaadin.event.FieldEvents.TextChangeEvent}s. Due to this high dependency to the terminal
-     * implementation this method is (at least at this point) not published.
-     *
-     * @return the text which is currently displayed in the field.
-     */
-    private String getCurrentTextContent() {
-        if (lastKnownTextContent != null) {
-            return lastKnownTextContent;
-        } else {
-            GeocodedLocation location = getValue();
-            if (location == null) {
-                return getNullRepresentation();
-            }
-            return location.getOriginalAddress();
-        }
-    }
-
     @Override
     public GeocodedLocation getValue() {
         return (GeocodedLocation)super.getValue();
-    }
-
-    /**
-     * Gets the current input prompt.
-     *
-     * @see #setInputPrompt(String)
-     * @return the current input prompt, or null if not enabled
-     */
-    public String getInputPrompt() {
-        return inputPrompt;
-    }
-
-    /**
-     * Sets the input prompt - a textual prompt that is displayed when the field
-     * would otherwise be empty, to prompt the user for input.
-     *
-     * @param inputPrompt
-     */
-    public void setInputPrompt(String inputPrompt) {
-        this.inputPrompt = inputPrompt;
-        requestRepaint();
     }
 
     /**

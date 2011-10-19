@@ -207,10 +207,15 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
             // Add TT anchor point
             DOM.setElementProperty(getElement(), "id", "VAADIN_COMBOBOX_OPTIONLIST");
 
+            //for (FilterSelectSuggestion f : currentSuggestions)
+                //VConsole.log("sugg - " + f.getReplacementString());
+            //VConsole.log("cur sugg - " + (currentSuggestion != null ? currentSuggestion.getReplacementString() : ""));
+
             menu.setSuggestions(currentSuggestions);
             final int x = VLocationTextField.this.getAbsoluteLeft();
             topPosition = tb.getAbsoluteTop();
             topPosition += tb.getOffsetHeight();
+            //VConsole.log("popup position: " + x + ", " + topPosition);
             setPopupPosition(x, topPosition);
 
             int nullOffset = (nullSelectionAllowed && "".equals(lastFilter) ? 1 : 0);
@@ -218,6 +223,11 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
             final int first = currentPage * pageLength + 1 - (firstPage ? 0 : nullOffset);
             final int last = first + currentSuggestions.size() - 1 - (firstPage && "".equals(lastFilter) ? nullOffset : 0);
             final int matches = totalSuggestions - nullOffset;
+            //VConsole.log("nullOffset - " + nullOffset);
+            //VConsole.log("firstPage - " + firstPage);
+            //VConsole.log("first - " + first);
+            //VConsole.log("last - " + last);
+            //VConsole.log("matches - " + matches);
             if (last > 0) {
                 // nullsel not counted, as requested by user
                 DOM.setInnerText(status, (matches == 0 ? 0 : first) + "-" + last + "/" + matches);
@@ -227,9 +237,11 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
             // We don't need to show arrows or statusbar if there is only one
             // page
             if (totalSuggestions <= pageLength || pageLength == 0) {
+                //VConsole.log("turning paging OFF");
                 setPagingEnabled(false);
             } else {
                 setPagingEnabled(true);
+                //VConsole.log("turning paging ON");
             }
             setPrevButtonActive(first > 1);
             setNextButtonActive(last < matches);
@@ -239,6 +251,15 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
             DOM.setStyleAttribute(DOM.getFirstChild(menu.getElement()), "width", "");
 
             setPopupPositionAndShow(this);
+            if (currentSuggestions.size() < 1 || (currentSuggestions.size() == 1 && nullSelectionAllowed))
+                hide();
+        }
+
+        @Override
+        public void show() {
+            int length = currentSuggestions.size();
+            if (length > 0 && (!nullSelectionAllowed || length > 1))
+                super.show();
         }
 
         /**
@@ -282,7 +303,7 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
                 final MenuItem newSelectedItem = menu.getItems().get(index);
                 menu.selectItem(newSelectedItem);
                 tb.setText(newSelectedItem.getText());
-                tb.setSelectionRange(lastFilter.length(), newSelectedItem.getText().length() - lastFilter.length());
+                tb.setSelectionRange(lastFilter.length(), Math.abs(newSelectedItem.getText().length() - lastFilter.length()));
             } else if (hasNextPage()) {
                 lastIndex = index - 1; // save for paging
                 filterOptions(currentPage + 1, lastFilter);
@@ -299,7 +320,7 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
                 final MenuItem newSelectedItem = menu.getItems().get(index);
                 menu.selectItem(newSelectedItem);
                 tb.setText(newSelectedItem.getText());
-                tb.setSelectionRange(lastFilter.length(), newSelectedItem.getText().length() - lastFilter.length());
+                tb.setSelectionRange(lastFilter.length(), Math.abs(newSelectedItem.getText().length() - lastFilter.length()));
             } else if (index == -1) {
                 if (currentPage > 0) {
                     lastIndex = index + 1; // save for paging
@@ -309,7 +330,7 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
                 final MenuItem newSelectedItem = menu.getItems().get(menu.getItems().size() - 1);
                 menu.selectItem(newSelectedItem);
                 tb.setText(newSelectedItem.getText());
-                tb.setSelectionRange(lastFilter.length(), newSelectedItem.getText().length() - lastFilter.length());
+                tb.setSelectionRange(lastFilter.length(), Math.abs(newSelectedItem.getText().length() - lastFilter.length()));
             }
         }
 
@@ -424,13 +445,15 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
             }
             offsetHeight = getOffsetHeight();
 
+//VConsole.log("offsetHeight - " + offsetHeight);
             final int desiredWidth = getMainWidth();
+//VConsole.log("desiredWidth - " + desiredWidth);
             int naturalMenuWidth = DOM.getElementPropertyInt(DOM.getFirstChild(menu.getElement()), "offsetWidth");
-
+//VConsole.log("naturalMenuWidth - " + naturalMenuWidth);
             if (popupOuterPadding == -1) {
                 popupOuterPadding = Util.measureHorizontalPaddingAndBorder(getElement(), 2);
             }
-
+//VConsole.log("popupOuterPadding - " + popupOuterPadding);
             if (naturalMenuWidth < desiredWidth) {
                 menu.setWidth((desiredWidth - popupOuterPadding) + "px");
                 DOM.setStyleAttribute(DOM.getFirstChild(menu.getElement()), "width", "100%");
@@ -462,7 +485,7 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
                 int topMargin = (top - topPosition);
                 top -= topMargin;
             }
-
+//VConsole.log("top - " + top);
             // fetch real width (mac FF bugs here due GWT popups overflow:auto )
             offsetWidth = DOM.getElementPropertyInt(DOM.getFirstChild(menu.getElement()), "offsetWidth");
             if (offsetWidth + getPopupLeft() > Window.getClientWidth() + Window.getScrollLeft()) {
@@ -474,7 +497,9 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
             } else {
                 left = getPopupLeft();
             }
+//VConsole.log("left - " + left);
             setPopupPosition(left, top);
+//VConsole.log("visible - " + isVisible());
         }
 
         /**
@@ -524,6 +549,8 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
         private VLazyExecutor delayedImageLoadExecutioner = new VLazyExecutor(100, new Scheduler.ScheduledCommand() {
 
             public void execute() {
+                //VConsole.log("popup visible - " + suggestionPopup.isVisible());
+                //VConsole.log("popup attached - " + suggestionPopup.isAttached());
                 if (suggestionPopup.isVisible() && suggestionPopup.isAttached()) {
                     setWidth("");
                     DOM.setStyleAttribute(DOM.getFirstChild(getElement()), "width", "");
@@ -581,6 +608,7 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
             final String enteredItemValue = tb.getText();
             if (nullSelectionAllowed && "".equals(enteredItemValue) && selectedOptionKey != null && !"".equals(selectedOptionKey)) {
                 if (nullSelectItem) {
+                    //VConsole.log("reset() called from doSelectedItemAction ");
                     reset();
                     return;
                 }
@@ -613,28 +641,35 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
                         // do not send a value change event if null was and
                         // stays selected
                         if (!"".equals(enteredItemValue) || (selectedOptionKey != null && !"" .equals(selectedOptionKey))) {
+                            //VConsole.log("doItemAction with " + potentialExactMatch + " called from doPostFilterSelectedItemAction ");
                             doItemAction(potentialExactMatch, true);
                         }
+                        //VConsole.log("hide popup called from doPostFilterSelectedItemAction ");
                         suggestionPopup.hide();
                         return;
                     }
                 }
             }
             if (item != null && !"".equals(lastFilter)) {
+                //VConsole.log("doItemAction with " + item + " called from doPostFilterSelectedItemAction ");
                 doItemAction(item, true);
             } else {
                 // currentSuggestion has key="" for nullselection
                 if (currentSuggestion != null && !currentSuggestion.key.equals("")) {
+                    //VConsole.log("current suggestion is not null in doPostFilterSelectedItemAction ");
                     // An item (not null) selected
                     String text = currentSuggestion.getReplacementString();
                     tb.setText(text);
                     selectedOptionKey = currentSuggestion.key;
+                    //VConsole.log("selected option key = " + selectedOptionKey + " in doPostFilterSelectedItemAction ");
                 } else {
+                    //VConsole.log("current suggestion is not null in doPostFilterSelectedItemAction ");
                     // Null selected
                     //tb.setText("");
                     selectedOptionKey = null;
                 }
             }
+            //VConsole.log("hide popup at end of called from doPostFilterSelectedItemAction ");
             suggestionPopup.hide();
         }
 
@@ -824,7 +859,6 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
     private static final String CLASSNAME_PROMPT = "prompt";
     private static final String ATTR_INPUTPROMPT = "prompt";
     public static final String ATTR_NO_TEXT_INPUT = "noInput";
-    private String inputPrompt = "";
     private boolean prompting = false;
 
     // Set true when popupopened has been clicked. Cleared on each UIDL-update.
@@ -1023,13 +1057,7 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
             return;
         }
         if (!filter.equals(lastFilter)) {
-            // we are on subsequent page and text has changed -> reset page
-            if ("".equals(filter)) {
-                // let server decide
-                page = -1;
-            } else {
-                page = 0;
-            }
+            page = 0;
         }
 
         currentPage = page;
@@ -1076,12 +1104,13 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
         nullSelectItem = uidl.hasAttribute("nullselectitem")
                 && uidl.getBooleanAttribute("nullselectitem");
 
-        currentPage = uidl.getIntVariable("page");
+        currentPage = Math.max(uidl.getIntVariable("page"), 0);
 
         if (uidl.hasAttribute("pagelength")) {
             pageLength = uidl.getIntAttribute("pagelength");
         }
 
+        String inputPrompt;
         if (uidl.hasAttribute(ATTR_INPUTPROMPT)) {
             // input prompt changed from server
             inputPrompt = uidl.getStringAttribute(ATTR_INPUTPROMPT);
@@ -1151,7 +1180,7 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
             tb.setText(text);
         }
 
-        lastFilter = valueBeforeEdit = uidl.getStringVariable("filter");
+        lastFilter = valueBeforeEdit = text;
 
         suggestionPopup.setPagingEnabled(true);
         suggestionPopup.updateStyleNames(uidl);
@@ -1163,7 +1192,7 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
          * to retain the value if the user does not select any of the
          * options matching the filter.
          */
-        currentSuggestion = null;
+        this.currentSuggestion = null;
         /*
          * Also ensure no old items in menu. Unless cleared the old values
          * may cause odd effects on blur events. Suggestions in menu might
@@ -1184,7 +1213,8 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
             final FilterSelectSuggestion suggestion = new FilterSelectSuggestion(optionUidl);
             currentSuggestions.add(suggestion);
             if (optionUidl.hasAttribute("selected")) {
-                if (popupOpenerClicked) {
+                //VConsole.log("popupOpenerClicked " + popupOpenerClicked);
+                //if (popupOpenerClicked) {
                     String newSelectedOptionKey = Integer.toString(suggestion.getOptionKey());
                     if (!newSelectedOptionKey.equals(selectedOptionKey) || suggestion.getReplacementString().equals(tb.getText())) {
                         // Update text field if we've got a new selection
@@ -1193,7 +1223,7 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
                         setPromptingOff(suggestion.getReplacementString());
                         selectedOptionKey = newSelectedOptionKey;
                     }
-                }
+                //}
                 currentSuggestion = suggestion;
                 setSelectedItemIcon(suggestion.getIconUri());
             }
@@ -1207,6 +1237,7 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
 
         if ((popupOpenerClicked) && uidl.hasVariable("selected")
           && uidl.getStringArrayVariable("selected").length == 0) {
+            //VConsole.log("select nulled");
             // select nulled
             if (!popupOpenerClicked) {
                 if (!focused) {
@@ -1223,8 +1254,10 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
         }
 
         suggestionPopup.showSuggestions(currentSuggestions, currentPage, totalMatches);
+        //VConsole.log("showing suggestions");
         if (!popupOpenerClicked && lastIndex != -1) {
             // we're paging w/ arrows
+            //VConsole.log("pagin with arrows");
             MenuItem activeMenuItem;
             if (lastIndex == 0) {
                 // going up, select last item
@@ -1241,16 +1274,19 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
                 suggestionPopup.menu.selectItem(activeMenuItem);
             } else {
                 // going down, select first item
+                //VConsole.log("select first item");
                 activeMenuItem = suggestionPopup.menu.getItems().get(0);
                 suggestionPopup.menu.selectItem(activeMenuItem);
             }
 
             setTextboxText(activeMenuItem.getText());
-            tb.setSelectionRange(lastFilter.length(), activeMenuItem.getText().length() - lastFilter.length());
+            tb.setSelectionRange(lastFilter.length(), Math.abs(activeMenuItem.getText().length() - lastFilter.length()));
 
             lastIndex = -1; // reset
         }
-        suggestionPopup.menu.doPostFilterSelectedItemAction();
+        //TODO: is this necessary?
+        if (currentSuggestion != null)
+            suggestionPopup.menu.doPostFilterSelectedItemAction();
 
         // Calculate minumum textarea width
         suggestionPopupMinWidth = minWidth(captions);
@@ -1385,7 +1421,7 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
         if ("".equals(newKey) && !focused) {
             setPromptingOn();
         } else {
-            VConsole.log("location - line 1483 - " + text);
+            //VConsole.log("location - line 1483 - " + text);
             setPromptingOff(text);
         }
         setSelectedItemIcon(suggestion.getIconUri());
@@ -1575,17 +1611,17 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
      * Resets the Select to its initial state
      */
     private void reset() {
-        VConsole.log("location - reset called");
+        //VConsole.log("location - reset called");
         if (currentSuggestion != null) {
             String text = currentSuggestion.getReplacementString();
             setPromptingOff(text);
             selectedOptionKey = currentSuggestion.key;
         } else {
             if (focused) {
-                VConsole.log("location - line 1684");
+                //VConsole.log("location - line 1684");
                 setPromptingOff("");
             } else {
-                VConsole.log("location - line 1687");
+                //VConsole.log("location - line 1687");
                 setPromptingOn();
             }
             selectedOptionKey = null;
@@ -1598,10 +1634,13 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
      * Listener for popupopener
      */
     public void onClick(ClickEvent event) {
+        VConsole.log("click event: t in enabled? " + textInputEnabled);
+        VConsole.log("on txt field? " + (event.getNativeEvent().getEventTarget().cast() == tb.getElement()));
         if (textInputEnabled && event.getNativeEvent().getEventTarget().cast() == tb.getElement()) {
             // Don't process clicks on the text field if text input is enabled
             return;
         }
+        VConsole.log("enabled: " + enabled);
         if (enabled && !readonly) {
             // ask suggestionPopup if it was just closed, we are using GWT
             // Popup's auto close feature
@@ -1610,9 +1649,10 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
                 popupOpenerClicked = true;
                 lastFilter = "";
             }
-            DOM.eventPreventDefault(DOM.eventGetCurrentEvent());
+            //DOM.eventPreventDefault(DOM.eventGetCurrentEvent());
             focus();
             tb.selectAll();
+            suggestionPopup.show();
         }
     }
 
@@ -1667,7 +1707,7 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
 
         focused = true;
         if (prompting && !readonly) {
-            VConsole.log("location - line 1768; prompting onFocus");
+            //VConsole.log("location - line 1768; prompting onFocus");
             setPromptingOff("");
         }
         addStyleDependentName("focus");
@@ -1725,13 +1765,13 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
                 tabPressed = false;
                 suggestionPopup.menu.doSelectedItemAction();
                 suggestionPopup.hide();
-            } else if (!suggestionPopup.isAttached() || suggestionPopup.isJustClosed()) {
+            }/* else if (!suggestionPopup.isAttached() || suggestionPopup.isJustClosed()) {
                 suggestionPopup.menu.doSelectedItemAction();
-            }
+            }*/
             if (selectedOptionKey == null) {
                 setPromptingOn();
             } else if (currentSuggestion != null) {
-                VConsole.log("location - line 1834 - " + currentSuggestion.caption);
+                //VConsole.log("location - line 1834 - " + currentSuggestion.caption);
                 setPromptingOff(currentSuggestion.caption);
             }
         }
@@ -1754,7 +1794,7 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
     public void focus() {
         focused = true;
         if (prompting && !readonly) {
-            VConsole.log("location - line 1856 prompting focus()");
+            //VConsole.log("location - line 1856 prompting focus()");
             setPromptingOff("");
         }
         tb.setFocus(true);
