@@ -69,7 +69,11 @@
     <target name="dist" depends="clean, mkdirs, vaadin-dist"
       description="--> cleans project and builds WAR file"/>
 
-    <target name="vaadin-dist" depends="mkdirs, javac"
+    <target name="samples" description="--> builds samples">
+        <ant antfile="build.xml" target="all" dir="../../samples/locationupdate" inheritall="false"/>
+    </target>
+
+    <target name="vaadin-dist" depends="mkdirs, samples"
       unless="vaadin-dist.completed" description="--> make Vaadin add-on archive">
         <antcontrib:outofdate>
             <sourcefiles>
@@ -110,6 +114,7 @@
                         <exclude name="*.zip"/>
                         <include name="${base.name}-${base.version}.jar"/>
                     </fileset>
+                    <fileset dir="../../samples/locationupdate/build/dist/" includes="*.war"/>
                     <fileset dir="../../" includes="README"/>
                 </jar>
             </sequential>
