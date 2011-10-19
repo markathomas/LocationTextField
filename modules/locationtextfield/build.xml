@@ -91,7 +91,7 @@
                         <attribute name="Build-User" value="${user.name}"/>
                         <attribute name="Build-Time" value="${TODAY} ${TSTAMP}"/>
                         <attribute name="Vaadin-Package-Version" value="1"/>
-                        <attribute name="Implementation-Title" value="locationtextfield"/>
+                        <attribute name="Implementation-Title" value="LocationTextField"/>
                         <attribute name="Implementation-Version" value="${base.version}"/>
                         <attribute name="Vaadin-Widgetsets" value="org.vaadin.addons.locationtextfield.LocationTextFieldWidgetset"/>
                         <attribute name="Vaadin-Addon" value="locationtextfield-${base.version}.jar"/>
@@ -105,7 +105,7 @@
                         <attribute name="Build-User" value="${user.name}"/>
                         <attribute name="Build-Time" value="${TODAY} ${TSTAMP}"/>
                         <attribute name="Vaadin-Package-Version" value="1"/>
-                        <attribute name="Implementation-Title" value="locationtextfield"/>
+                        <attribute name="Implementation-Title" value="LocationTextField"/>
                         <attribute name="Implementation-Version" value="${base.version}"/>
                         <attribute name="Vaadin-Widgetsets" value="org.vaadin.addons.locationtextfield.LocationTextFieldWidgetset"/>
                         <attribute name="Vaadin-Addon" value="locationtextfield-${base.version}.jar"/>
