@@ -39,7 +39,7 @@ public abstract class URLConnectionGeocoder implements LocationProvider {
             URLConnection con = new URL(addr).openConnection();
             con.setDoOutput(true);
             con.connect();
-            reader = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+            reader = new BufferedReader(new InputStreamReader(con.getInputStream(), getEncoding()));
             final StringBuilder builder = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null)
@@ -57,6 +57,10 @@ public abstract class URLConnectionGeocoder implements LocationProvider {
             }
         }
         return locations;
+    }
+
+    protected String getEncoding() {
+        return "UTF-8";
     }
 
     protected abstract String getURL(String address) throws UnsupportedEncodingException;
