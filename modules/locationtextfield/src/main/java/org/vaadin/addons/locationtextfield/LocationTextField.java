@@ -35,11 +35,11 @@ import java.util.WeakHashMap;
 import org.vaadin.addons.locationtextfield.client.ui.VLocationTextField;
 
 @ClientWidget(value = VLocationTextField.class, loadStyle = ClientWidget.LoadStyle.EAGER)
-public class LocationTextField extends Select {
+public class LocationTextField<T extends GeocodedLocation> extends Select {
 
     private final transient Map<String, GeocodedLocation> locations = new WeakHashMap<String, GeocodedLocation>();
     private final BeanItemContainer<GeocodedLocation> container = new BeanItemContainer<GeocodedLocation>(GeocodedLocation.class);
-    private final LocationProvider locationProvider;
+    private final LocationProvider<T> locationProvider;
 
     /**
      * Null representation.
@@ -71,12 +71,12 @@ public class LocationTextField extends Select {
 
     private boolean autoSelectOnSingleResult;
 
-    public LocationTextField(LocationProvider locationProvider) {
+    public LocationTextField(LocationProvider<T> locationProvider) {
         this(locationProvider, "");
     }
 
     @SuppressWarnings("deprecation")
-    public LocationTextField(final LocationProvider locationProvider, String caption) {
+    public LocationTextField(final LocationProvider<T> locationProvider, String caption) {
         super(caption);
         this.locationProvider = locationProvider;
         super.setMultiSelect(false);
@@ -225,7 +225,7 @@ public class LocationTextField extends Select {
     private void update() {
         try {
             String addr = this.lastKnownTextContent;
-            Collection<GeocodedLocation> locs;
+            Collection<T> locs;
             if (addr != null && !"".equals(addr.trim()))
                 locs = this.locationProvider.geocode(addr.trim());
             else
