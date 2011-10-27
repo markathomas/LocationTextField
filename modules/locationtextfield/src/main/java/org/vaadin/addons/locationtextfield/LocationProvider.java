@@ -25,6 +25,6 @@ import java.util.Collection;
 /**
  * Inteface providing {@link GeocodedLocation}s based on an address
  */
-public interface LocationProvider extends Serializable {
-    Collection<GeocodedLocation> geocode(String address) throws GeocodingException;
+public interface LocationProvider<T extends GeocodedLocation> extends Serializable {
+    Collection<T> geocode(String address) throws GeocodingException;
 }
