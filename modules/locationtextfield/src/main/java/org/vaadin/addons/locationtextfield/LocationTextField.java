@@ -27,8 +27,10 @@ import com.vaadin.ui.AbstractTextField;
 import com.vaadin.ui.ClientWidget;
 import com.vaadin.ui.Select;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -290,8 +292,30 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
     }
 
     @Override
-    public GeocodedLocation getValue() {
-        return (GeocodedLocation)super.getValue();
+    @SuppressWarnings("unchecked")
+    public T getValue() {
+        Object value = super.getValue();
+        if (value instanceof String) {
+            this.setValue(value);
+            return this.getValue();
+        } if (value instanceof GeocodedLocation)
+            return (T)value;
+        return null;
+    }
+
+    @Override
+    public void setValue(Object value) {
+        Object newValue = null;
+        if (value instanceof String) {
+            geocode((String)value);
+            final List<Object> itemIds = new ArrayList<Object>(getItemIds());
+            final int index = (isNullSelectionAllowed() ? 1 : 0);
+            if (itemIds.size() > (isNullSelectionAllowed() ? 1 : 0))
+                newValue = itemIds.get(index);
+        } else if (value instanceof GeocodedLocation) {
+            newValue = value;
+        }
+        super.setValue(newValue);
     }
 
     /**
