@@ -29,7 +29,7 @@
 
     <!-- Define some properties -->
     <property name="base.name" value="${ant.project.name}"/>
-    <property name="base.version" value="1.0.1"/>
+    <property name="base.version" value="1.0.2"/>
 
     <!-- Import build macros -->
     <import file="../../buildsettings/macros.xml"/>
@@ -73,7 +73,7 @@
         <ant antfile="build.xml" target="all" dir="../../samples/locationupdate" inheritall="false"/>
     </target>
 
-    <target name="vaadin-dist" depends="mkdirs, samples"
+    <target name="vaadin-dist" depends="mkdirs, javac, samples"
       unless="vaadin-dist.completed" description="--> make Vaadin add-on archive">
         <antcontrib:outofdate>
             <sourcefiles>
