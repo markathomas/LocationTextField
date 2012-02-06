@@ -137,8 +137,6 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
             target.addAttribute(VLocationTextField.ATTR_TEXT_CHANGED, true);
             localValueChanged = false;
         }
-         // TODO: get paging to actually work
-        target.addVariable(this, "pagelength", "100");
 
         target.addVariable(this, "filter", this.lastKnownTextContent);
 
