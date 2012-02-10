@@ -52,7 +52,7 @@ public final class GoogleGeocoder extends URLConnectionGeocoder {
     }
 
     protected String getURL(String address) throws UnsupportedEncodingException {
-        return (this.useSecureConnection ? SECURE_URL : INSECURE_URL) + "?address=" + URLEncoder.encode(address, "UTF-8");
+        return (this.useSecureConnection ? SECURE_URL : INSECURE_URL) + "?address=" + URLEncoder.encode(address, "UTF-8") + "&sensor=false";
     }
 
     protected Collection<? extends GeocodedLocation> createLocations(String address, String input) throws GeocodingException {
@@ -93,7 +93,7 @@ public final class GoogleGeocoder extends URLConnectionGeocoder {
                     }
                     JSONObject location = result.getJSONObject("geometry").getJSONObject("location");
                     loc.setLat(location.getDouble("lat"));
-                    loc.setLon(location.getDouble("lon"));
+                    loc.setLon(location.getDouble("lng"));
                     loc.setType(getLocationType(result));
                     locations.add(loc);
                 }
