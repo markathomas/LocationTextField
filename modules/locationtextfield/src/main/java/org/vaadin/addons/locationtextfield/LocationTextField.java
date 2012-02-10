@@ -72,6 +72,7 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
     private boolean localValueChanged = true;
 
     private boolean autoSelectOnSingleResult;
+    private boolean selecting;
 
     public LocationTextField(LocationProvider<T> locationProvider) {
         this(locationProvider, "");
@@ -146,7 +147,7 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
 
     @Override
     protected void setValue(Object newValue, boolean repaintIsNotNeeded) throws ReadOnlyException, ConversionException {
-        if (notEqual(newValue, getValue())) {
+        if (notEqual(newValue, super.getValue())) {
             // The client should use the new value
             localValueChanged = true;
             if (!repaintIsNotNeeded) {
@@ -192,6 +193,16 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
         }
         if (variables.containsKey(FieldEvents.BlurEvent.EVENT_ID)) {
             fireEvent(new FieldEvents.BlurEvent(this));
+        }
+    }
+
+    @Override
+    public void select(Object itemId) {
+        this.selecting = true;
+        try {
+            super.select(itemId);
+        } finally {
+            this.selecting = false;
         }
     }
 
@@ -303,6 +314,11 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
 
     @Override
     public void setValue(Object value) {
+        if (this.selecting) {
+            super.setValue(value);
+            return;
+        }
+
         Object newValue = null;
         if (value instanceof String) {
             geocode((String)value);
