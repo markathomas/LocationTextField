@@ -1038,6 +1038,7 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
      *            The page which items are to be filtered
      */
     public void filterOptions(int page) {
+
         filterOptions(page, tb.getText());
     }
 
