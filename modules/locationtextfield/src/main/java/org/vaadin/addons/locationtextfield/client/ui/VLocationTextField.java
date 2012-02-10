@@ -1060,10 +1060,12 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
             page = 0;
         }
 
-        client.updateVariable(paintableId, "filter", filter, false);
-        client.updateVariable(paintableId, "page", page, true);
-        lastFilter = filter;
-        currentPage = page;
+        if (currentPage != page) {
+            client.updateVariable(paintableId, "filter", filter, false);
+            client.updateVariable(paintableId, "page", page, true);
+            lastFilter = filter;
+            currentPage = page;
+        }
     }
 
     /*
