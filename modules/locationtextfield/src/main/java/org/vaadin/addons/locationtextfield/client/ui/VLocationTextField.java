@@ -218,16 +218,18 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
             //VConsole.log("popup position: " + x + ", " + topPosition);
             setPopupPosition(x, topPosition);
 
-            int nullOffset = (nullSelectionAllowed && "".equals(lastFilter) ? 1 : 0);
+            int nullOffset = 0;//(nullSelectionAllowed && "".equals(lastFilter) ? 1 : 0);
             boolean firstPage = (currentPage == 0);
             final int first = currentPage * pageLength + 1 - (firstPage ? 0 : nullOffset);
             final int last = first + currentSuggestions.size() - 1 - (firstPage && "".equals(lastFilter) ? nullOffset : 0);
             final int matches = totalSuggestions - nullOffset;
-            //VConsole.log("nullOffset - " + nullOffset);
-            //VConsole.log("firstPage - " + firstPage);
-            //VConsole.log("first - " + first);
-            //VConsole.log("last - " + last);
-            //VConsole.log("matches - " + matches);
+            /*VConsole.log("totalSuggestions - " + totalSuggestions);
+            VConsole.log("currentPage - " + currentPage);
+            VConsole.log("nullOffset - " + nullOffset);
+            VConsole.log("firstPage - " + firstPage);
+            VConsole.log("first - " + first);
+            VConsole.log("last - " + last);
+            VConsole.log("matches - " + matches);*/
             if (last > 0) {
                 // nullsel not counted, as requested by user
                 DOM.setInnerText(status, (matches == 0 ? 0 : first) + "-" + last + "/" + matches);
@@ -251,14 +253,14 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
             DOM.setStyleAttribute(DOM.getFirstChild(menu.getElement()), "width", "");
 
             setPopupPositionAndShow(this);
-            if (currentSuggestions.size() < 1 || (currentSuggestions.size() == 1 && nullSelectionAllowed))
+            if (currentSuggestions.size() < 1)// || (currentSuggestions.size() == 1 && nullSelectionAllowed))
                 hide();
         }
 
         @Override
         public void show() {
             int length = currentSuggestions.size();
-            if (length > 0 && (!nullSelectionAllowed || length > 1))
+            if (length > 0)// && (!nullSelectionAllowed || length > 1))
                 super.show();
         }
 
@@ -605,7 +607,7 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
          */
         public void doSelectedItemAction() {
             // do not send a value change event if null was and stays selected
-            final String enteredItemValue = tb.getText();
+            /*final String enteredItemValue = tb.getText();
             if (nullSelectionAllowed && "".equals(enteredItemValue) && selectedOptionKey != null && !"".equals(selectedOptionKey)) {
                 if (nullSelectItem) {
                     //VConsole.log("reset() called from doSelectedItemAction ");
@@ -619,7 +621,7 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
                 client.updateVariable(paintableId, "selected", new String[] {}, immediate);
                 suggestionPopup.hide();
                 return;
-            }
+            }*/
 
             doPostFilterSelectedItemAction();
         }
@@ -715,6 +717,7 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
         }
     }
 
+    public static final String ATTR_ENTER_KEY_FIRES_TEXT_CHANGE = "eke";
     public static final String ATTR_TEXTCHANGE_TIMEOUT = "iet";
     public static final String ATTR_TEXT_CHANGED = "textChanged";
     public static final String ATTR_TEXTCHANGE_EVENTMODE = "iem";
@@ -850,8 +853,8 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
     private FilterSelectSuggestion currentSuggestion;
 
     private int totalMatches;
-    private boolean nullSelectionAllowed;
-    private boolean nullSelectItem;
+    //private boolean nullSelectionAllowed;
+    //private boolean nullSelectItem;
     private boolean enabled;
     private boolean readonly;
 
@@ -880,6 +883,7 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
     private boolean textInputEnabled = true;
 
     private boolean scheduled = false;
+    private boolean enterKeyFiresTextChange = false;
 
     private String valueBeforeEdit = null;
     private String textChangeEventMode;
@@ -1105,10 +1109,10 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
 
         immediate = uidl.hasAttribute("immediate");
 
-        nullSelectionAllowed = uidl.hasAttribute("nullselect");
+        /*nullSelectionAllowed = uidl.hasAttribute("nullselect");
 
         nullSelectItem = uidl.hasAttribute("nullselectitem")
-                && uidl.getBooleanAttribute("nullselectitem");
+                && uidl.getBooleanAttribute("nullselectitem");*/
 
         currentPage = Math.max(uidl.getIntVariable("page"), 0);
 
@@ -1133,6 +1137,9 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
         }
         sinkEvents(TEXTCHANGE_EVENTS);
         attachCutEventListener(tb.getElement());
+
+        if (uidl.hasAttribute(ATTR_ENTER_KEY_FIRES_TEXT_CHANGE))
+            this.enterKeyFiresTextChange = uidl.getBooleanAttribute(ATTR_ENTER_KEY_FIRES_TEXT_CHANGE);
 
         final String text;
         if (uidl.hasVariable("filter") && (firstPaint || (uidl.hasAttribute(ATTR_TEXT_CHANGED)
@@ -1488,8 +1495,14 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
     public void onKeyDown(KeyDownEvent event) {
         if (enabled && !readonly) {
             if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+                /*if (enterKeyFiresTextChange) {
+                    if (communicateTextValueToServer()) {
+                        client.sendPendingVariableChanges();
+                        return;
+                    }
+                }*/
                 // Same reaction to enter no matter on whether the popup is open
-                if (suggestionPopup.isAttached()) {
+                if (suggestionPopup.isAttached() || enterKeyFiresTextChange) {
                     filterOptions(currentPage);
                 } else if (currentSuggestion != null && tb.getText().equals(currentSuggestion.getReplacementString())) {
                     // Retain behavior from #6686 by returning without stopping

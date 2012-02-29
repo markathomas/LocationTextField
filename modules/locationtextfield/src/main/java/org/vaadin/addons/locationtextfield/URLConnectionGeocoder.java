@@ -32,10 +32,10 @@ import java.util.Set;
 /**
  * {@link LocationProvider} shell implementation that fetches data from an URL and delegates to implementing class to decode
  */
-public abstract class URLConnectionGeocoder implements LocationProvider {
+public abstract class URLConnectionGeocoder<T extends GeocodedLocation> implements LocationProvider<T> {
 
-    public Collection<GeocodedLocation> geocode(String address) throws GeocodingException {
-        final Set<GeocodedLocation> locations = new LinkedHashSet<GeocodedLocation>();
+    public Collection<T> geocode(String address) throws GeocodingException {
+        final Set<T> locations = new LinkedHashSet<T>();
         BufferedReader reader = null;
         try {
             String addr = getURL(address);
@@ -84,6 +84,5 @@ public abstract class URLConnectionGeocoder implements LocationProvider {
      * @return collection of {@link GeocodedLocation} objects
      * @throws GeocodingException
      */
-    protected abstract Collection<? extends GeocodedLocation> createLocations(String address, String input)
-      throws GeocodingException;
+    protected abstract Collection<T> createLocations(String address, String input) throws GeocodingException;
 }

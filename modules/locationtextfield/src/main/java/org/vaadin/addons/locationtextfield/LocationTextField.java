@@ -44,11 +44,6 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
     private final LocationProvider<T> locationProvider;
 
     /**
-     * Null representation.
-     */
-    private String nullRepresentation = "";
-
-    /**
      * The text content when the last messages to the server was sent.
      */
     private String lastKnownTextContent;
@@ -73,6 +68,7 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
 
     private boolean autoSelectOnSingleResult;
     private boolean selecting;
+    private boolean enterKeyFiresTextChange;
 
     public LocationTextField(LocationProvider<T> locationProvider) {
         this(locationProvider, "");
@@ -87,6 +83,7 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
         super.setImmediate(true);
         super.setNewItemsAllowed(false);
         super.setReadOnly(false);
+        super.setNullSelectionAllowed(false);
         this.setContainerDataSource(this.container);
         this.setItemCaptionPropertyId("geocodedAddress");
     }
@@ -112,6 +109,11 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
     }
 
     @Override
+    public void setNullSelectionAllowed(boolean nullSelectionAllowed) {
+        // nothing
+    }
+
+    @Override
     public void setReadOnly(boolean readOnly) {
         // nothing
     }
@@ -120,6 +122,16 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
     @Deprecated
     public void setMultiSelect(boolean multiSelect) {
         // nothing
+    }
+
+    /**
+     * Whether or not pressing the ENTER key inside the text box fires a text change event
+     */
+    public boolean isEnterKeyFiresTextChange() {
+        return this.enterKeyFiresTextChange;
+    }
+    public void setEnterKeyFiresTextChange(boolean enterKeyFiresTextChange) {
+        this.enterKeyFiresTextChange = enterKeyFiresTextChange;
     }
 
     /**
@@ -143,6 +155,7 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
 
         target.addAttribute(VLocationTextField.ATTR_TEXTCHANGE_EVENTMODE, getTextChangeEventMode().toString());
         target.addAttribute(VLocationTextField.ATTR_TEXTCHANGE_TIMEOUT, getTextChangeTimeout());
+        target.addAttribute(VLocationTextField.ATTR_ENTER_KEY_FIRES_TEXT_CHANGE, this.isEnterKeyFiresTextChange());
     }
 
     @Override
@@ -160,6 +173,21 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
 
     private static boolean notEqual(Object newValue, Object oldValue) {
         return oldValue != newValue && (newValue == null || !newValue.equals(oldValue));
+    }
+
+    /**
+     * Convenience method for explicitly setting the location
+     * @param location
+     */
+    @SuppressWarnings("unchecked")
+    public void setLocation(T location) {
+        final BeanItemContainer<GeocodedLocation> container = (BeanItemContainer<GeocodedLocation>)this.getContainerDataSource();
+        container.removeAllItems();
+        if (location != null) {
+            container.addBean(location);
+            this.lastKnownTextContent = location.getGeocodedAddress();
+        }
+        super.setValue(location);
     }
 
     @Override
@@ -256,48 +284,6 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
             e.printStackTrace();
             // ignore or log
         }
-    }
-
-    /**
-     * Gets the null-string representation.
-     *
-     * <p>
-     * The null-valued strings are represented on the user interface by
-     * replacing the null value with this string. If the null representation is
-     * set null (not 'null' string), painting null value throws exception.
-     * </p>
-     *
-     * <p>
-     * The default value is string 'null'.
-     * </p>
-     *
-     * @return the String Textual representation for null strings.
-     * @see com.vaadin.ui.TextField#isNullSettingAllowed()
-     */
-    public String getNullRepresentation() {
-        return nullRepresentation;
-    }
-
-    /**
-     * Sets the null-string representation.
-     *
-     * <p>
-     * The null-valued strings are represented on the user interface by
-     * replacing the null value with this string. If the null representation is
-     * set null (not 'null' string), painting null value throws exception.
-     * </p>
-     *
-     * <p>
-     * The default value is string 'null'
-     * </p>
-     *
-     * @param nullRepresentation
-     *            Textual representation for null strings.
-     * @see com.vaadin.ui.TextField#setNullSettingAllowed(boolean)
-     */
-    public void setNullRepresentation(String nullRepresentation) {
-        this.nullRepresentation = nullRepresentation;
-        requestRepaint();
     }
 
     @Override

@@ -1,3 +1,4 @@
+
 /*
  *
  *  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -32,11 +33,13 @@ import org.json.JSONObject;
 /**
  * {@link LocationProvider} which uses OpenStreetMap
  */
-public final class OpenStreetMapGeocoder extends URLConnectionGeocoder {
+public final class OpenStreetMapGeocoder extends URLConnectionGeocoder<GeocodedLocation> {
 
     private static final String BASE_URL = "http://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=";
 
     private static final OpenStreetMapGeocoder INSTANCE = new OpenStreetMapGeocoder();
+
+    private int limit;
 
     private OpenStreetMapGeocoder() {
         // nuthin'
@@ -46,14 +49,27 @@ public final class OpenStreetMapGeocoder extends URLConnectionGeocoder {
         return INSTANCE;
     }
 
-    protected String getURL(String address) throws UnsupportedEncodingException {
-        return BASE_URL + URLEncoder.encode(address, "UTF-8");
+    /**
+     * Max number of results; default is10
+      * @return
+     */
+    public int getLimit() {
+        return limit;
+    }
+    public void setLimit(int limit) {
+        this.limit = limit;
     }
 
-    protected Collection<? extends GeocodedLocation> createLocations(String address, String input) throws GeocodingException {
+    protected String getURL(String address) throws UnsupportedEncodingException {
+        String url = BASE_URL + URLEncoder.encode(address, "UTF-8");
+        if (this.limit > 0)
+            url += "&limit=" + this.limit;
+        return url;
+    }
+
+    protected Collection<GeocodedLocation> createLocations(String address, String input) throws GeocodingException {
         final Set<GeocodedLocation> locations = new LinkedHashSet<GeocodedLocation>();
         try {
-            System.out.println(input);
             JSONArray results = new JSONArray(input);
             boolean ambiguous = results.length() > 1;
             for (int i = 0; i < results.length(); i++) {

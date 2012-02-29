@@ -1,4 +1,5 @@
-package org.vaadin.addons.locationtextfield;/*
+
+/*
  *
  *  * Licensed to the Apache Software Foundation (ASF) under one or more
  *  * contributor license agreements.  See the NOTICE file distributed with
@@ -17,6 +18,8 @@ package org.vaadin.addons.locationtextfield;/*
  *
  */
 
+package org.vaadin.addons.locationtextfield;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Collection;
@@ -33,7 +36,7 @@ import org.json.JSONObject;
  * This class can only be used when used in conjunction with Google Maps API
  * See http://code.google.com/apis/maps/documentation/geocoding/ for details
  */
-public final class GoogleGeocoder extends URLConnectionGeocoder {
+public final class GoogleGeocoder extends URLConnectionGeocoder<GeocodedLocation> {
 
     private static final String URL = "maps.googleapis.com/maps/api/geocode/json";
     private static final String INSECURE_URL = "http://" + URL;
@@ -52,10 +55,11 @@ public final class GoogleGeocoder extends URLConnectionGeocoder {
     }
 
     protected String getURL(String address) throws UnsupportedEncodingException {
-        return (this.useSecureConnection ? SECURE_URL : INSECURE_URL) + "?address=" + URLEncoder.encode(address, "UTF-8") + "&sensor=false";
+        return (this.useSecureConnection ? SECURE_URL : INSECURE_URL) + "?address=" + URLEncoder.encode(address, "UTF-8")
+          + "&sensor=false";
     }
 
-    protected Collection<? extends GeocodedLocation> createLocations(String address, String input) throws GeocodingException {
+    protected Collection<GeocodedLocation> createLocations(String address, String input) throws GeocodingException {
         final Set<GeocodedLocation> locations = new LinkedHashSet<GeocodedLocation>();
         try {
             JSONObject obj = new JSONObject(input);
