@@ -1495,14 +1495,9 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
     public void onKeyDown(KeyDownEvent event) {
         if (enabled && !readonly) {
             if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-                /*if (enterKeyFiresTextChange) {
-                    if (communicateTextValueToServer()) {
-                        client.sendPendingVariableChanges();
-                        return;
-                    }
-                }*/
-                // Same reaction to enter no matter on whether the popup is open
-                if (suggestionPopup.isAttached() || enterKeyFiresTextChange) {
+                if (enterKeyFiresTextChange && communicateTextValueToServer()) {
+                    client.sendPendingVariableChanges();
+                } else if (suggestionPopup.isAttached()) { // Same reaction to enter no matter on whether the popup is open
                     filterOptions(currentPage);
                 } else if (currentSuggestion != null && tb.getText().equals(currentSuggestion.getReplacementString())) {
                     // Retain behavior from #6686 by returning without stopping
