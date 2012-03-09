@@ -39,7 +39,7 @@ public class LocationUpdateApplication extends Application {
         final OpenStreetMapGeocoder geocoder = OpenStreetMapGeocoder.getInstance();
         geocoder.setLimit(25);
         final LocationTextField<GeocodedLocation> ltf =
-          new LocationTextField<GeocodedLocation>(geocoder, "Address: ");
+          new LocationTextField<GeocodedLocation>(geocoder, GeocodedLocation.class, "Address: ");
         ltf.setWidth("100%");
         ltf.setEnterKeyFiresTextChange(true);
         vl.addComponent(ltf);

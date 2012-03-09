@@ -40,7 +40,6 @@ import org.vaadin.addons.locationtextfield.client.ui.VLocationTextField;
 public class LocationTextField<T extends GeocodedLocation> extends Select {
 
     private final transient Map<String, GeocodedLocation> locations = new WeakHashMap<String, GeocodedLocation>();
-    private final BeanItemContainer<GeocodedLocation> container = new BeanItemContainer<GeocodedLocation>(GeocodedLocation.class);
     private final LocationProvider<T> locationProvider;
 
     /**
@@ -70,13 +69,13 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
     private boolean selecting;
     private boolean enterKeyFiresTextChange;
 
-    public LocationTextField(LocationProvider<T> locationProvider) {
-        this(locationProvider, "");
+    public LocationTextField(LocationProvider<T> locationProvider, Class<T> clazz) {
+        this(locationProvider, clazz, null);
     }
 
     @SuppressWarnings("deprecation")
-    public LocationTextField(final LocationProvider<T> locationProvider, String caption) {
-        super(caption);
+    public LocationTextField(final LocationProvider<T> locationProvider, Class<T> clazz, String caption) {
+        super(caption, new BeanItemContainer<T>(clazz));
         this.locationProvider = locationProvider;
         super.setMultiSelect(false);
         super.setFilteringMode(FILTERINGMODE_OFF);
@@ -84,7 +83,6 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
         super.setNewItemsAllowed(false);
         super.setReadOnly(false);
         super.setNullSelectionAllowed(false);
-        this.setContainerDataSource(this.container);
         this.setItemCaptionPropertyId("geocodedAddress");
     }
 
@@ -175,19 +173,32 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
         return oldValue != newValue && (newValue == null || !newValue.equals(oldValue));
     }
 
+    @SuppressWarnings("unchecked")
+    public BeanItemContainer<T> getContainerDataSource() {
+        return (BeanItemContainer<T>)super.getContainerDataSource();
+    }
+
     /**
      * Convenience method for explicitly setting the location
      * @param location
      */
     @SuppressWarnings("unchecked")
     public void setLocation(T location) {
-        final BeanItemContainer<GeocodedLocation> container = (BeanItemContainer<GeocodedLocation>)this.getContainerDataSource();
-        container.removeAllItems();
+        getContainerDataSource().removeAllItems();
         if (location != null) {
-            container.addBean(location);
+            getContainerDataSource().addBean(location);
             this.lastKnownTextContent = location.getGeocodedAddress();
+        } else {
+            this.lastKnownTextContent = null;
         }
         super.setValue(location);
+    }
+
+    /**
+     * Removes all options and resets text field
+     */
+    public void clear() {
+        this.setLocation(null);
     }
 
     @Override
@@ -269,12 +280,12 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
                 locs = this.locationProvider.geocode(addr.trim());
             else
                 locs = Collections.emptyList();
-            this.container.removeAllItems();
+            getContainerDataSource().removeAllItems();
             synchronized (this.locations) {
                 this.locations.clear();
-                for (GeocodedLocation loc : locs) {
+                for (T loc : locs) {
                     this.locations.put(loc.getGeocodedAddress(), loc);
-                    this.container.addBean(loc);
+                    getContainerDataSource().addBean(loc);
                 }
                 if (this.locations.size() == 1 && isAutoSelectOnSingleResult())
                     this.select(this.locations.values().iterator().next());
@@ -306,7 +317,10 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
         }
 
         Object newValue = null;
-        if (value instanceof String) {
+        if (value == null) {
+            this.clear();
+            return;
+        } else if (value instanceof String) {
             geocode((String)value);
             final List<Object> itemIds = new ArrayList<Object>(getItemIds());
             final int index = (isNullSelectionAllowed() ? 1 : 0);
@@ -314,6 +328,7 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
                 newValue = itemIds.get(index);
         } else if (value instanceof GeocodedLocation) {
             newValue = value;
+            this.lastKnownTextContent = ((GeocodedLocation)value).getGeocodedAddress();
         }
         super.setValue(newValue);
     }
