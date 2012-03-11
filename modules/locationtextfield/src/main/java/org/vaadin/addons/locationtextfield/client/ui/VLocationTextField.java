@@ -74,6 +74,8 @@ import java.util.List;
 public class VLocationTextField extends Composite implements Paintable, Field, KeyDownHandler, KeyUpHandler, ClickHandler,
   FocusHandler, BlurHandler, Focusable, ChangeHandler {
 
+    public static final String FILTER = "ltfFilter";
+
     /**
      * Represents a suggestion in the suggestion popup box
      */
@@ -945,7 +947,7 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
         }
         if (!text.equals(lastFilter)) {
             lastFilter = text;
-            client.updateVariable(paintableId, "filter", text, false);
+            client.updateVariable(paintableId, FILTER, text, false);
             client.updateVariable(paintableId, "page", currentPage, false);
             return true;
         }
@@ -993,7 +995,7 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
             if (!prompting && newText != null && !newText.equals(valueBeforeEdit)) {
                 sendValueChange = immediate;
                 lastFilter = newText;
-                client.updateVariable(paintableId, "filter", lastFilter, false);
+                client.updateVariable(paintableId, FILTER, lastFilter, false);
                 client.updateVariable(paintableId, "page", currentPage, false);
                 valueBeforeEdit = newText;
             }
@@ -1066,7 +1068,7 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
         }
 
         if (currentPage != page) {
-            client.updateVariable(paintableId, "filter", filter, false);
+            client.updateVariable(paintableId, FILTER, filter, false);
             client.updateVariable(paintableId, "page", page, true);
             lastFilter = filter;
             currentPage = page;
@@ -1142,11 +1144,11 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
             this.enterKeyFiresTextChange = uidl.getBooleanAttribute(ATTR_ENTER_KEY_FIRES_TEXT_CHANGE);
 
         final String text;
-        if (uidl.hasVariable("filter") && (firstPaint || (uidl.hasAttribute(ATTR_TEXT_CHANGED)
+        if (uidl.hasVariable(FILTER) && (firstPaint || (uidl.hasAttribute(ATTR_TEXT_CHANGED)
           && uidl.getBooleanAttribute(ATTR_TEXT_CHANGED)))) {
             // Use value from UIDL if this is the first time the component is
             // painted or if something has changed on the server
-            text = uidl.getStringVariable("filter");
+            text = uidl.getStringVariable(FILTER);
         } else {
             // Use what we already have if no change from the server
             text = prompting ? null : tb.getText();

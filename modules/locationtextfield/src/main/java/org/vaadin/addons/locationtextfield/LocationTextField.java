@@ -30,15 +30,19 @@ import com.vaadin.ui.Select;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vaadin.addons.locationtextfield.client.ui.VLocationTextField;
 
 @ClientWidget(value = VLocationTextField.class, loadStyle = ClientWidget.LoadStyle.EAGER)
 public class LocationTextField<T extends GeocodedLocation> extends Select {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(LocationTextField.class) ;
     private final transient Map<String, GeocodedLocation> locations = new WeakHashMap<String, GeocodedLocation>();
     private final LocationProvider<T> locationProvider;
 
@@ -149,7 +153,9 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
             localValueChanged = false;
         }
 
-        target.addVariable(this, "filter", this.lastKnownTextContent);
+        if (LOGGER.isTraceEnabled())
+            LOGGER.trace("Sending " + this.lastKnownTextContent + " as filter string to client");
+        target.addVariable(this, VLocationTextField.FILTER, this.lastKnownTextContent);
 
         target.addAttribute(VLocationTextField.ATTR_TEXTCHANGE_EVENTMODE, getTextChangeEventMode().toString());
         target.addAttribute(VLocationTextField.ATTR_TEXTCHANGE_TIMEOUT, getTextChangeTimeout());
@@ -159,17 +165,21 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
     @Override
     protected void setValue(Object newValue, boolean repaintIsNotNeeded) throws ReadOnlyException, ConversionException {
         if (notEqual(newValue, super.getValue())) {
+            if (LOGGER.isTraceEnabled())
+                LOGGER.trace("values not equal; local value changed");
             // The client should use the new value
             localValueChanged = true;
-            if (!repaintIsNotNeeded) {
-                // Repaint even if super.setValue doesn't detect any change
-                requestRepaint();
-            }
+            repaintIsNotNeeded = false;
+
         }
+        if (LOGGER.isTraceEnabled())
+            LOGGER.trace("calling super.value(" + newValue + ", " + repaintIsNotNeeded + ")");
         super.setValue(newValue, repaintIsNotNeeded);
     }
 
-    private static boolean notEqual(Object newValue, Object oldValue) {
+    private boolean notEqual(Object newValue, Object oldValue) {
+        if (LOGGER.isTraceEnabled())
+            LOGGER.trace("old: " + oldValue + "; new: " + newValue);
         return oldValue != newValue && (newValue == null || !newValue.equals(oldValue));
     }
 
@@ -184,13 +194,23 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
      */
     @SuppressWarnings("unchecked")
     public void setLocation(T location) {
+        if (LOGGER.isTraceEnabled())
+            LOGGER.trace("set location called with " + location);
         getContainerDataSource().removeAllItems();
+        if (LOGGER.isTraceEnabled())
+            LOGGER.trace("container cleared");
         if (location != null) {
+            if (LOGGER.isTraceEnabled())
+                LOGGER.trace("adding " + location + " to container");
             getContainerDataSource().addBean(location);
+            if (LOGGER.isTraceEnabled())
+                LOGGER.trace("last known text now = " + location);
             this.lastKnownTextContent = location.getGeocodedAddress();
         } else {
             this.lastKnownTextContent = null;
         }
+        if (LOGGER.isTraceEnabled())
+            LOGGER.trace("calling super.setValue(" + location + ")");
         super.setValue(location);
     }
 
@@ -198,28 +218,41 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
      * Removes all options and resets text field
      */
     public void clear() {
+        if (LOGGER.isTraceEnabled())
+            LOGGER.trace("clearing location");
         this.setLocation(null);
     }
 
     @Override
     public void changeVariables(Object source, Map<String, Object> variables) {
-        super.changeVariables(source, variables);
+        final Map<String, Object> map = new HashMap<String, Object>(variables.size() + 1);
+        map.putAll(variables);
+        map.put("filter", variables.get(VLocationTextField.FILTER));
+        super.changeVariables(source, map);
 
         // Sets the text
-        if (variables.containsKey("filter")) {
+        if (map.containsKey(VLocationTextField.FILTER)) {
 
             // Only do the setting if the string representation of the value
             // has been updated
-            String newValue = ("" + variables.get("filter")).trim();
+            String newValue = ("" + map.get(VLocationTextField.FILTER)).trim();
+            if (LOGGER.isTraceEnabled())
+                LOGGER.trace("filter value from client = " + newValue);
 
             if (!newValue.equals(lastKnownTextContent) && !"".equals(newValue)) {
+                if (LOGGER.isTraceEnabled())
+                    LOGGER.trace("filter different than last known of " + lastKnownTextContent);
                 GeocodedLocation newLocation;
                 synchronized (this.locations) {
                     newLocation = this.locations.get(newValue); // this is the geocoded address if a match is found
                 }
                 if (newLocation != null) {
+                    if (LOGGER.isTraceEnabled())
+                        LOGGER.trace("already geocoded " + newValue + "; selecting " + newLocation);
                     this.select(newLocation);
                 } else {
+                    if (LOGGER.isTraceEnabled())
+                        LOGGER.trace("triggering geocode of " + newValue);
                     lastKnownTextContent = newValue;
                     textChangeEventPending = true;
                 }
@@ -227,10 +260,10 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
         }
         firePendingTextChangeEvent();
 
-        if (variables.containsKey(FieldEvents.FocusEvent.EVENT_ID)) {
+        if (map.containsKey(FieldEvents.FocusEvent.EVENT_ID)) {
             fireEvent(new FieldEvents.FocusEvent(this));
         }
-        if (variables.containsKey(FieldEvents.BlurEvent.EVENT_ID)) {
+        if (map.containsKey(FieldEvents.BlurEvent.EVENT_ID)) {
             fireEvent(new FieldEvents.BlurEvent(this));
         }
     }
@@ -239,6 +272,8 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
     public void select(Object itemId) {
         this.selecting = true;
         try {
+            if (LOGGER.isTraceEnabled())
+                LOGGER.trace("selecting " + itemId);
             super.select(itemId);
         } finally {
             this.selecting = false;
@@ -247,6 +282,8 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
 
     private void firePendingTextChangeEvent() {
         if (textChangeEventPending) {
+            if (LOGGER.isTraceEnabled())
+                LOGGER.trace("text change pending; updating");
             textChangeEventPending = false;
             update();
         }
@@ -275,11 +312,15 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
     private void update() {
         try {
             String addr = this.lastKnownTextContent;
+            if (LOGGER.isTraceEnabled())
+                LOGGER.trace("geocoding " + addr);
             Collection<T> locs;
             if (addr != null && !"".equals(addr.trim()))
                 locs = this.locationProvider.geocode(addr.trim());
             else
                 locs = Collections.emptyList();
+            if (LOGGER.isTraceEnabled())
+                LOGGER.trace("found " + locs.size() + " locations");
             getContainerDataSource().removeAllItems();
             synchronized (this.locations) {
                 this.locations.clear();
@@ -292,7 +333,7 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
             }
             requestRepaint();
         } catch (GeocodingException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             // ignore or log
         }
     }
@@ -302,6 +343,8 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
     public T getValue() {
         Object value = super.getValue();
         if (value instanceof String) {
+            if (LOGGER.isTraceEnabled())
+                LOGGER.trace("get value returned String; geocoding");
             this.setValue(value);
             return this.getValue();
         } if (value instanceof GeocodedLocation)
@@ -312,15 +355,21 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
     @Override
     public void setValue(Object value) {
         if (this.selecting) {
+            if (LOGGER.isTraceEnabled())
+                LOGGER.trace("selecting; calling super");
             super.setValue(value);
             return;
         }
 
         Object newValue = null;
         if (value == null) {
+            if (LOGGER.isTraceEnabled())
+                LOGGER.trace("value is null; clearing");
             this.clear();
             return;
         } else if (value instanceof String) {
+            if (LOGGER.isTraceEnabled())
+                LOGGER.trace("value is string; geocoding");
             geocode((String)value);
             final List<Object> itemIds = new ArrayList<Object>(getItemIds());
             final int index = (isNullSelectionAllowed() ? 1 : 0);
@@ -329,7 +378,11 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
         } else if (value instanceof GeocodedLocation) {
             newValue = value;
             this.lastKnownTextContent = ((GeocodedLocation)value).getGeocodedAddress();
+            if (LOGGER.isTraceEnabled())
+                LOGGER.trace("setting last known to " + this.lastKnownTextContent);
         }
+        if (LOGGER.isTraceEnabled())
+            LOGGER.trace("setting value to " + newValue);
         super.setValue(newValue);
     }
 
