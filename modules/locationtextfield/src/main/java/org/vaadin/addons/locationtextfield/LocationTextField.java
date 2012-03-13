@@ -167,10 +167,9 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
         if (notEqual(newValue, super.getValue())) {
             if (LOGGER.isTraceEnabled())
                 LOGGER.trace("values not equal; local value changed");
-            // The client should use the new value
-            localValueChanged = true;
-            repaintIsNotNeeded = false;
 
+            // The client should use the new value
+            repaintIsNotNeeded = !this.setLocationText(this.getStringValue(newValue));
         }
         if (LOGGER.isTraceEnabled())
             LOGGER.trace("calling super.value(" + newValue + ", " + repaintIsNotNeeded + ")");
@@ -180,7 +179,24 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
     private boolean notEqual(Object newValue, Object oldValue) {
         if (LOGGER.isTraceEnabled())
             LOGGER.trace("old: " + oldValue + "; new: " + newValue);
-        return oldValue != newValue && (newValue == null || !newValue.equals(oldValue));
+        String str1 = this.getStringValue(oldValue);
+        String str2 = this.getStringValue(newValue);
+
+        if (str1 == null && str2 == null)
+            return false;
+        else if (str1 == null)
+            return true;
+        else if (str2 == null)
+            return true;
+        return !str1.equals(str2);
+    }
+
+    private String getStringValue(Object o) {
+        if (o instanceof String)
+            return (String)o;
+        else if (o instanceof GeocodedLocation)
+            return ((GeocodedLocation)o).getGeocodedAddress();
+        return null;
     }
 
     @SuppressWarnings("unchecked")
@@ -205,13 +221,36 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
             getContainerDataSource().addBean(location);
             if (LOGGER.isTraceEnabled())
                 LOGGER.trace("last known text now = " + location);
-            this.lastKnownTextContent = location.getGeocodedAddress();
+            this.setLocationText(location.getGeocodedAddress());
         } else {
-            this.lastKnownTextContent = null;
+            this.setLocationText(null);
         }
         if (LOGGER.isTraceEnabled())
             LOGGER.trace("calling super.setValue(" + location + ")");
         super.setValue(location);
+    }
+
+    private boolean setLocationText(String address) {
+        boolean changed;
+        if (this.lastKnownTextContent == null && address == null)
+            changed = false;
+        else if (this.lastKnownTextContent == null)
+            changed = true;
+        else if (address == null)
+            changed = true;
+        else
+            changed = !this.lastKnownTextContent.equals(address);
+
+        if (changed) {
+            if (LOGGER.isTraceEnabled())
+                LOGGER.trace("Changing last known text content from `" + this.lastKnownTextContent + "' to `" + address + "'");
+            this.lastKnownTextContent = address;
+            this.localValueChanged = true;
+        } else {
+            if (LOGGER.isTraceEnabled())
+                LOGGER.trace("No change detected; do nothing");
+        }
+        return changed;
     }
 
     /**
@@ -236,25 +275,24 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
             // Only do the setting if the string representation of the value
             // has been updated
             String newValue = ("" + map.get(VLocationTextField.FILTER)).trim();
-            if (LOGGER.isTraceEnabled())
-                LOGGER.trace("filter value from client = " + newValue);
-
-            if (!newValue.equals(lastKnownTextContent) && !"".equals(newValue)) {
+            if (!"".equals(newValue)) {
                 if (LOGGER.isTraceEnabled())
-                    LOGGER.trace("filter different than last known of " + lastKnownTextContent);
-                GeocodedLocation newLocation;
-                synchronized (this.locations) {
-                    newLocation = this.locations.get(newValue); // this is the geocoded address if a match is found
-                }
-                if (newLocation != null) {
-                    if (LOGGER.isTraceEnabled())
-                        LOGGER.trace("already geocoded " + newValue + "; selecting " + newLocation);
-                    this.select(newLocation);
-                } else {
-                    if (LOGGER.isTraceEnabled())
-                        LOGGER.trace("triggering geocode of " + newValue);
-                    lastKnownTextContent = newValue;
-                    textChangeEventPending = true;
+                    LOGGER.trace("filter value from client = `" + newValue + "'");
+
+                if (this.setLocationText(newValue)) {
+                    GeocodedLocation newLocation;
+                    synchronized (this.locations) {
+                        newLocation = this.locations.get(newValue); // this is the geocoded address if a match is found
+                    }
+                    if (newLocation != null) {
+                        if (LOGGER.isTraceEnabled())
+                            LOGGER.trace("already geocoded " + newValue + "; selecting " + newLocation);
+                        this.select(newLocation);
+                    } else {
+                        if (LOGGER.isTraceEnabled())
+                            LOGGER.trace("triggering geocode of " + newValue);
+                        this.textChangeEventPending = true;
+                    }
                 }
             }
         }
@@ -294,9 +332,10 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
      * @param address String representation of an address
      */
     public void geocode(String address) {
-        this.lastKnownTextContent = address;
-        this.textChangeEventPending = true;
-        firePendingTextChangeEvent();
+        if (this.setLocationText(address)) {
+            this.textChangeEventPending = true;
+            firePendingTextChangeEvent();
+        }
     }
 
     /**
@@ -334,7 +373,6 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
             requestRepaint();
         } catch (GeocodingException e) {
             LOGGER.error(e.getMessage(), e);
-            // ignore or log
         }
     }
 
@@ -377,9 +415,7 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
                 newValue = itemIds.get(index);
         } else if (value instanceof GeocodedLocation) {
             newValue = value;
-            this.lastKnownTextContent = ((GeocodedLocation)value).getGeocodedAddress();
-            if (LOGGER.isTraceEnabled())
-                LOGGER.trace("setting last known to " + this.lastKnownTextContent);
+            this.setLocationText(this.getStringValue(value));
         }
         if (LOGGER.isTraceEnabled())
             LOGGER.trace("setting value to " + newValue);

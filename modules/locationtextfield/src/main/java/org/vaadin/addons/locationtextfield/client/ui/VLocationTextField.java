@@ -306,7 +306,7 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
             if (menu.getItems().size() > index) {
                 final MenuItem newSelectedItem = menu.getItems().get(index);
                 menu.selectItem(newSelectedItem);
-                tb.setText(newSelectedItem.getText());
+                setTextboxText(newSelectedItem.getText());
                 tb.setSelectionRange(lastFilter.length(), Math.abs(newSelectedItem.getText().length() - lastFilter.length()));
             } else if (hasNextPage()) {
                 lastIndex = index - 1; // save for paging
@@ -323,7 +323,7 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
             if (index > -1) {
                 final MenuItem newSelectedItem = menu.getItems().get(index);
                 menu.selectItem(newSelectedItem);
-                tb.setText(newSelectedItem.getText());
+                setTextboxText(newSelectedItem.getText());
                 tb.setSelectionRange(lastFilter.length(), Math.abs(newSelectedItem.getText().length() - lastFilter.length()));
             } else if (index == -1) {
                 if (currentPage > 0) {
@@ -333,7 +333,7 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
             } else {
                 final MenuItem newSelectedItem = menu.getItems().get(menu.getItems().size() - 1);
                 menu.selectItem(newSelectedItem);
-                tb.setText(newSelectedItem.getText());
+                setTextboxText(newSelectedItem.getText());
                 tb.setSelectionRange(lastFilter.length(), Math.abs(newSelectedItem.getText().length() - lastFilter.length()));
             }
         }
@@ -663,7 +663,7 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
                     //VConsole.log("current suggestion is not null in doPostFilterSelectedItemAction ");
                     // An item (not null) selected
                     String text = currentSuggestion.getReplacementString();
-                    tb.setText(text);
+                    setTextboxText(text);
                     selectedOptionKey = currentSuggestion.key;
                     //VConsole.log("selected option key = " + selectedOptionKey + " in doPostFilterSelectedItemAction ");
                 } else {
@@ -992,9 +992,10 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
             }
 
             String newText = tb.getText();
-            if (!prompting && newText != null && !newText.equals(valueBeforeEdit)) {
+            if (!blurred && !prompting && newText != null && !newText.equals(valueBeforeEdit)) {
                 sendValueChange = immediate;
                 lastFilter = newText;
+                setTextboxText(lastFilter);
                 client.updateVariable(paintableId, FILTER, lastFilter, false);
                 client.updateVariable(paintableId, "page", currentPage, false);
                 valueBeforeEdit = newText;
@@ -1178,7 +1179,7 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
                      * which then again happens due to this Gecko hack.
                      */
                     if (!tb.getText().equals(text)) {
-                        tb.setText(text);
+                        setTextboxText(text);
                     }
                 }
             });
@@ -1192,7 +1193,9 @@ public class VLocationTextField extends Composite implements Paintable, Field, K
                 removeStyleDependentName(CLASSNAME_PROMPT);
             }
             //tb.setText(fieldValue);
-            tb.setText(text);
+            if (!tb.getText().equals(text)) {
+                setTextboxText(text);
+            }
         }
 
         lastFilter = valueBeforeEdit = text;
