@@ -274,8 +274,8 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
 
             // Only do the setting if the string representation of the value
             // has been updated
-            String newValue = ("" + map.get(VLocationTextField.FILTER)).trim();
-            if (!"".equals(newValue)) {
+            String newValue = ("" + map.get(VLocationTextField.FILTER));
+            if (!"".equals(newValue.trim())) {
                 if (LOGGER.isTraceEnabled())
                     LOGGER.trace("filter value from client = `" + newValue + "'");
 
