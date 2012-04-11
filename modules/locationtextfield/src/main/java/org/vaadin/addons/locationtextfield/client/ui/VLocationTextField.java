@@ -1467,25 +1467,9 @@ VConsole.log("visible - " + isVisible());
      *            The KeyDownEvent
      */
     private void inputFieldKeyDown(KeyDownEvent event) {
-        switch (event.getNativeKeyCode()) {
-        case KeyCodes.KEY_DOWN:
-        case KeyCodes.KEY_UP:
-        case KeyCodes.KEY_PAGEDOWN:
-        case KeyCodes.KEY_PAGEUP:
-            if (!suggestionPopup.isAttached()) {
-                // open popup as from gadget
-                filterOptions(-1, "");
-                lastFilter = "";
-                tb.selectAll();
-            }
-            break;
-        case KeyCodes.KEY_TAB:
-            if (suggestionPopup.isAttached()) {
-                filterOptions(currentPage, tb.getText());
-            }
-            break;
+        if (event.getNativeKeyCode() == KeyCodes.KEY_TAB && suggestionPopup.isAttached()) {
+            filterOptions(currentPage, tb.getText());
         }
-
     }
 
     /**
@@ -1590,14 +1574,7 @@ VConsole.log("visible - " + isVisible());
         }
         VConsole.log("enabled: " + enabled);
         if (enabled && !readonly) {
-            // ask suggestionPopup if it was just closed, we are using GWT
-            // Popup's auto close feature
-            if (!suggestionPopup.isJustClosed()) {
-                filterOptions(-1, "");
-                popupOpenerClicked = true;
-                lastFilter = "";
-            }
-            //DOM.eventPreventDefault(DOM.eventGetCurrentEvent());
+             //DOM.eventPreventDefault(DOM.eventGetCurrentEvent());
             focus();
             tb.selectAll();
             suggestionPopup.show();
