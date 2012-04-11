@@ -723,6 +723,7 @@ VConsole.log("visible - " + isVisible());
     public static final String ATTR_TEXTCHANGE_TIMEOUT = "iet";
     public static final String ATTR_TEXT_CHANGED = "textChanged";
     public static final String ATTR_TEXTCHANGE_EVENTMODE = "iem";
+    public static final String VAR_ENTER_PRESSED = "ep";
     private static final String TEXTCHANGE_MODE_TIMEOUT = "TIMEOUT";
 
     private static final String CLASSNAME = "v-filterselect";
@@ -1430,6 +1431,7 @@ VConsole.log("visible - " + isVisible());
                 if (enterKeyFiresTextChange) {
                     VConsole.log("enter key pressed");
                     if (communicateTextValueToServer()) {
+                        client.updateVariable(paintableId, VAR_ENTER_PRESSED, true, false);
                         client.sendPendingVariableChanges();
                     } else {
                         VConsole.log("text has NOT changed; show popup");

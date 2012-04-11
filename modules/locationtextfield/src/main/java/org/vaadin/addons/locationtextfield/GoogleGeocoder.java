@@ -66,7 +66,10 @@ public final class GoogleGeocoder extends URLConnectionGeocoder<GeocodedLocation
             if ("OK".equals(obj.getString("status"))) {
                 JSONArray results = obj.getJSONArray("results");
                 boolean ambiguous = results.length() > 1;
-                for (int i = 0; i < results.length(); i++) {
+                int limit = results.length();
+                if (this.getLimit() > 0)
+                    limit = Math.min(this.getLimit(), limit);
+                for (int i = 0; i < limit; i++) {
                     JSONObject result = results.getJSONObject(i);
                     GeocodedLocation loc = new GeocodedLocation();
                     loc.setAmbiguous(ambiguous);

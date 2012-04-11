@@ -25,14 +25,18 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
  * {@link LocationProvider} shell implementation that fetches data from an URL and delegates to implementing class to decode
  */
 public abstract class URLConnectionGeocoder<T extends GeocodedLocation> implements LocationProvider<T> {
+
+    private int limit;
 
     public Collection<T> geocode(String address) throws GeocodingException {
         final Set<T> locations = new LinkedHashSet<T>();
@@ -47,7 +51,13 @@ public abstract class URLConnectionGeocoder<T extends GeocodedLocation> implemen
             String line;
             while ((line = reader.readLine()) != null)
                 builder.append(line);
-            locations.addAll(createLocations(address, builder.toString()));
+            Collection<T> locs = createLocations(address, builder.toString());
+            if (this.limit > 0 && locs.size() > this.limit) {
+                List<T> list = new ArrayList<T>(locs);
+                locations.addAll(list.subList(0, this.limit));
+            } else {
+                locations.addAll(locs);
+            }
         } catch (Exception e) {
             throw new GeocodingException(e.getMessage(), e);
         } finally {
@@ -85,4 +95,14 @@ public abstract class URLConnectionGeocoder<T extends GeocodedLocation> implemen
      * @throws GeocodingException
      */
     protected abstract Collection<T> createLocations(String address, String input) throws GeocodingException;
+
+    /**
+     * Max number of results; default is0 which means unbounded
+     */
+    public int getLimit() {
+        return this.limit;
+    }
+    public void setLimit(int limit) {
+        this.limit = limit;
+    }
 }

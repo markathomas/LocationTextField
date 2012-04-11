@@ -27,4 +27,5 @@ import java.util.Collection;
  */
 public interface LocationProvider<T extends GeocodedLocation> extends Serializable {
     Collection<T> geocode(String address) throws GeocodingException;
+    void setLimit(int limit);
 }

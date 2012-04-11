@@ -72,6 +72,8 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
     private boolean autoSelectOnSingleResult;
     private boolean selecting;
     private boolean enterKeyFiresTextChange;
+    private int minTextLength;
+    private boolean enterPressed;
 
     public LocationTextField(LocationProvider<T> locationProvider, Class<T> clazz) {
         this(locationProvider, clazz, null);
@@ -303,6 +305,10 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
                 }
             }
         }
+
+        if (map.containsKey(VLocationTextField.VAR_ENTER_PRESSED))
+            this.enterPressed = (Boolean)map.get(VLocationTextField.VAR_ENTER_PRESSED);
+
         firePendingTextChangeEvent();
 
         if (map.containsKey(FieldEvents.FocusEvent.EVENT_ID)) {
@@ -361,9 +367,16 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
             if (LOGGER.isTraceEnabled())
                 LOGGER.trace("geocoding " + addr);
             Collection<T> locs;
-            if (addr != null && !"".equals(addr.trim()))
-                locs = this.locationProvider.geocode(addr.trim());
-            else
+            if (addr != null && !"".equals(addr.trim())) {
+                addr = addr.trim();
+                if (this.minTextLength <= 0 || addr.length() >= this.minTextLength || this.enterPressed) {
+                    locs = this.locationProvider.geocode(addr);
+                    this.enterPressed = false;
+                } else {
+                    LOGGER.debug("Input address `" + addr + "' is less than the minimum text length of " + this.minTextLength);
+                    return;
+                }
+            } else
                 locs = Collections.emptyList();
             if (LOGGER.isTraceEnabled())
                 LOGGER.trace("found " + locs.size() + " locations");
@@ -476,5 +489,16 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
      */
     public int getTextChangeTimeout() {
         return textChangeEventTimeout;
+    }
+
+    /**
+     * Minimum length of text WITHOUT whitespace in order to initiate geocoding
+     * @return
+     */
+    public int getMinTextLength() {
+        return this.minTextLength;
+    }
+    public void setMinTextLength(int minTextLength) {
+        this.minTextLength = minTextLength;
     }
 }

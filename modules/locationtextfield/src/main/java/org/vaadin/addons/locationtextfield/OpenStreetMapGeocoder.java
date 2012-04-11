@@ -39,8 +39,6 @@ public final class OpenStreetMapGeocoder extends URLConnectionGeocoder<GeocodedL
 
     private static final OpenStreetMapGeocoder INSTANCE = new OpenStreetMapGeocoder();
 
-    private int limit;
-
     private OpenStreetMapGeocoder() {
         // nuthin'
     }
@@ -49,21 +47,10 @@ public final class OpenStreetMapGeocoder extends URLConnectionGeocoder<GeocodedL
         return INSTANCE;
     }
 
-    /**
-     * Max number of results; default is10
-      * @return
-     */
-    public int getLimit() {
-        return limit;
-    }
-    public void setLimit(int limit) {
-        this.limit = limit;
-    }
-
     protected String getURL(String address) throws UnsupportedEncodingException {
         String url = BASE_URL + URLEncoder.encode(address, "UTF-8");
-        if (this.limit > 0)
-            url += "&limit=" + this.limit;
+        if (this.getLimit() > 0)
+            url += "&limit=" + this.getLimit();
         return url;
     }
 
