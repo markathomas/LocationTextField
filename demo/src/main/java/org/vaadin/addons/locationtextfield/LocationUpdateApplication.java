@@ -21,6 +21,7 @@ package org.vaadin.addons.locationtextfield;
 
 import com.vaadin.Application;
 import com.vaadin.data.Property;
+import com.vaadin.ui.AbstractTextField;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
@@ -42,6 +43,10 @@ public class LocationUpdateApplication extends Application {
           new LocationTextField<GeocodedLocation>(geocoder, GeocodedLocation.class, "Address: ");
         ltf.setWidth("100%");
         ltf.setEnterKeyFiresTextChange(true);
+        ltf.setInputPrompt("<<Enter Address>>");
+        ltf.setTextChangeEventMode(AbstractTextField.TextChangeEventMode.TIMEOUT);
+        ltf.setTextChangeTimeout(1200);
+        ltf.setLocation(getNYCity());
         vl.addComponent(ltf);
 
         final TextField lat = new TextField("Latitude: ");
@@ -65,11 +70,7 @@ public class LocationUpdateApplication extends Application {
         Button b = new Button("Set Location to New York City, NY");
         b.addListener(new Button.ClickListener() {
             public void buttonClick(Button.ClickEvent event) {
-                GeocodedLocation loc = new GeocodedLocation();
-                loc.setLon(-73.9381406004754);
-                loc.setLat(40.6637996714713);
-                loc.setOriginalAddress("NYC, New York, United States of America");
-                loc.setGeocodedAddress("NYC, New York, United States of America");
+                GeocodedLocation loc = getNYCity();
                 ltf.setLocation(loc);
             }
         });
@@ -77,5 +78,14 @@ public class LocationUpdateApplication extends Application {
 
         mainWindow.setContent(vl);
         setMainWindow(mainWindow);
+    }
+
+    private GeocodedLocation getNYCity() {
+        GeocodedLocation loc = new GeocodedLocation();
+        loc.setLon(-73.9381406004754);
+        loc.setLat(40.6637996714713);
+        loc.setOriginalAddress("NYC, New York, United States of America");
+        loc.setGeocodedAddress("NYC, New York, United States of America");
+        return loc;
     }
 }

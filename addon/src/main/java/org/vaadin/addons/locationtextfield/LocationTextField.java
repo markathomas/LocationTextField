@@ -37,9 +37,9 @@ import java.util.WeakHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vaadin.addons.locationtextfield.client.ui.VLocationTextField;
+import org.vaadin.addons.locationtextfield.client.ui.VLocationTextField2;
 
-@ClientWidget(value = VLocationTextField.class, loadStyle = ClientWidget.LoadStyle.EAGER)
+@ClientWidget(value = VLocationTextField2.class, loadStyle = ClientWidget.LoadStyle.EAGER)
 public class LocationTextField<T extends GeocodedLocation> extends Select {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LocationTextField.class) ;
@@ -50,6 +50,11 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
      * The text content when the last messages to the server was sent.
      */
     private String lastKnownTextContent;
+
+    /**
+     * The prompt to display in an empty field. Null when disabled.
+     */
+    private String inputPrompt;
 
     /**
      * Flag indicating that a text change event is pending to be triggered.
@@ -74,6 +79,7 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
     private boolean enterKeyFiresTextChange;
     private int minTextLength;
     private boolean enterPressed;
+    private boolean debugEnabled;
 
     public LocationTextField(LocationProvider<T> locationProvider, Class<T> clazz) {
         this(locationProvider, clazz, null);
@@ -151,17 +157,23 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
         super.paintContent(target);
 
         if (localValueChanged) {
-            target.addAttribute(VLocationTextField.ATTR_TEXT_CHANGED, true);
+            target.addAttribute(VLocationTextField2.ATTR_TEXT_CHANGED, true);
             localValueChanged = false;
         }
 
+        if (getInputPrompt() != null) {
+            target.addAttribute("prompt", getInputPrompt());
+        }
+
+        target.addAttribute(VLocationTextField2.ATTR_DEBUG_ENABLED, this.isDebugEnabled());
+
         if (LOGGER.isTraceEnabled())
             LOGGER.trace("Sending " + this.lastKnownTextContent + " as filter string to client");
-        target.addVariable(this, VLocationTextField.FILTER, this.lastKnownTextContent);
+        target.addVariable(this, VLocationTextField2.FILTER, this.lastKnownTextContent);
 
-        target.addAttribute(VLocationTextField.ATTR_TEXTCHANGE_EVENTMODE, getTextChangeEventMode().toString());
-        target.addAttribute(VLocationTextField.ATTR_TEXTCHANGE_TIMEOUT, getTextChangeTimeout());
-        target.addAttribute(VLocationTextField.ATTR_ENTER_KEY_FIRES_TEXT_CHANGE, this.isEnterKeyFiresTextChange());
+        target.addAttribute(VLocationTextField2.ATTR_TEXTCHANGE_EVENTMODE, getTextChangeEventMode().toString());
+        target.addAttribute(VLocationTextField2.ATTR_TEXTCHANGE_TIMEOUT, getTextChangeTimeout());
+        target.addAttribute(VLocationTextField2.ATTR_ENTER_KEY_FIRES_TEXT_CHANGE, this.isEnterKeyFiresTextChange());
     }
 
     @Override
@@ -219,7 +231,7 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
         getContainerDataSource().removeAllItems();
         if (LOGGER.isTraceEnabled())
             LOGGER.trace("container cleared");
-        boolean changed = false;
+        boolean changed;
         if (location != null) {
             if (LOGGER.isTraceEnabled())
                 LOGGER.trace("adding " + location + " to container");
@@ -237,7 +249,7 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
         super.setValue(location);
     }
 
-    private boolean setLocationText(String address) {
+    protected boolean setLocationText(String address) {
         boolean changed;
         if (this.lastKnownTextContent == null && address == null)
             changed = false;
@@ -272,15 +284,15 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
     public void changeVariables(Object source, Map<String, Object> variables) {
         final Map<String, Object> map = new HashMap<String, Object>(variables.size() + 1);
         map.putAll(variables);
-        map.put("filter", variables.get(VLocationTextField.FILTER));
+        map.put("filter", variables.get(VLocationTextField2.FILTER));
         super.changeVariables(source, map);
 
         // Sets the text
-        if (map.containsKey(VLocationTextField.FILTER)) {
+        if (map.containsKey(VLocationTextField2.FILTER)) {
 
             // Only do the setting if the string representation of the value
             // has been updated
-            String newValue = ("" + map.get(VLocationTextField.FILTER));
+            String newValue = ("" + map.get(VLocationTextField2.FILTER));
 
             if (LOGGER.isTraceEnabled())
                 LOGGER.trace("filter value from client = `" + newValue + "'");
@@ -306,8 +318,8 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
             }
         }
 
-        if (map.containsKey(VLocationTextField.VAR_ENTER_PRESSED))
-            this.enterPressed = (Boolean)map.get(VLocationTextField.VAR_ENTER_PRESSED);
+        if (map.containsKey(VLocationTextField2.VAR_ENTER_PRESSED))
+            this.enterPressed = (Boolean)map.get(VLocationTextField2.VAR_ENTER_PRESSED);
 
         firePendingTextChangeEvent();
 
@@ -500,5 +512,40 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
     }
     public void setMinTextLength(int minTextLength) {
         this.minTextLength = minTextLength;
+    }
+
+    /**
+     * Gets the current input prompt.
+     *
+     * @see #setInputPrompt(String)
+     * @return the current input prompt, or null if not enabled
+     */
+    public String getInputPrompt() {
+        return this.inputPrompt;
+    }
+
+    /**
+     * Sets the input prompt - a textual prompt that is displayed when the field
+     * would otherwise be empty, to prompt the user for input.
+     *
+     * @param inputPrompt
+     */
+    public void setInputPrompt(String inputPrompt) {
+        boolean condition1 = this.inputPrompt == null && inputPrompt != null;
+        boolean condition2 = this.inputPrompt != null && inputPrompt == null;
+        if (condition1 || condition2 || !("" + this.inputPrompt).equals("" + inputPrompt)) {
+            this.inputPrompt = inputPrompt;
+            requestRepaint();
+        }
+    }
+
+    public boolean isDebugEnabled() {
+        return this.debugEnabled;
+    }
+    public void setDebugEnabled(final boolean debugEnabled) {
+        if (this.debugEnabled != debugEnabled) {
+            this.debugEnabled = debugEnabled;
+            this.requestRepaint();
+        }
     }
 }
