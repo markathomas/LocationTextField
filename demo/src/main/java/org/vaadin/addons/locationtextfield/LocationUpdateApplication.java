@@ -46,7 +46,7 @@ public class LocationUpdateApplication extends Application {
         ltf.setInputPrompt("<<Enter Address>>");
         ltf.setTextChangeEventMode(AbstractTextField.TextChangeEventMode.TIMEOUT);
         ltf.setTextChangeTimeout(1200);
-        ltf.setLocation(getNYCity());
+        //ltf.setLocation(getNYCity());
         vl.addComponent(ltf);
 
         final TextField lat = new TextField("Latitude: ");

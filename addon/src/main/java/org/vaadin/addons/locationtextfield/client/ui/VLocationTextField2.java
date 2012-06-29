@@ -1498,6 +1498,8 @@ public class VLocationTextField2 extends Composite implements Paintable, Field,
         // CHANGE: only reset input prompt if current text = input prompt
         if (!"".equals(text))
             setTextboxText(text);
+        if (tb.getText().equals(this.inputPrompt))
+            setTextboxText("");
         if (prompting) {
             prompting = false;
             removeStyleDependentName(CLASSNAME_PROMPT);
@@ -1840,6 +1842,7 @@ public class VLocationTextField2 extends Composite implements Paintable, Field,
                 popupOpenerClicked = true;
                 lastFilter = "";
             }*/
+            setPromptingOff("");
             DOM.eventPreventDefault(DOM.eventGetCurrentEvent());
             focus();
             tb.selectAll();
