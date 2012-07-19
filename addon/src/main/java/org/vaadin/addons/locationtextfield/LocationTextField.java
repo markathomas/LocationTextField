@@ -386,6 +386,7 @@ public class LocationTextField<T extends GeocodedLocation> extends Select {
                     this.enterPressed = false;
                 } else {
                     LOGGER.debug("Input address `" + addr + "' is less than the minimum text length of " + this.minTextLength);
+                    setLocationText(addr);
                     return;
                 }
             } else
