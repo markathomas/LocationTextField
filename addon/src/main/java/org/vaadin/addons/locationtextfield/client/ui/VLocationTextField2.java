@@ -1617,7 +1617,6 @@ public class VLocationTextField2 extends Composite implements Paintable, Field,
                         VConsole.log("text has NOT changed; show popup");
                         suggestionPopup.setPopupPositionAndShow(suggestionPopup);
                     }
-                    return;
                 } else if (suggestionPopup.isAttached()) { // Same reaction to enter no matter on whether the popup is open
                     filterOptions(currentPage);
                 } else if (currentSuggestion != null && tb.getText().equals(currentSuggestion.getReplacementString())) {
