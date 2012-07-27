@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.vaadin.addons</groupId>
   <artifactId>locationtextfield-parent</artifactId>
-  <version>1.2.5</version>
+  <version>1.2.6</version>
   <packaging>pom</packaging>
 
   <name>locationtextfield parent project</name>

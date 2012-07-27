@@ -3,9 +3,9 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.vaadin.addons</groupId>
   <artifactId>locationtextfield-root</artifactId>
-  <version>1.2.5</version>
+  <version>1.2.6</version>
   <packaging>pom</packaging>
-  
+
   <name>locationtextfield root project</name>
 
   <properties>
@@ -14,14 +14,14 @@
     <addonFullName>${addonBaseName}-${project.version}</addonFullName>
     <addonJarName>${addonFullName}.jar</addonJarName>
   </properties>
-  
+
   <modules>
     <module>parent</module>
     <module>addon</module>
     <module>demo</module>
     <module>manual</module>
   </modules>
-  
+
   <build>
     <plugins>
       <!-- Build a ZIP package for the Vaadin add-on, including documentation etc. -->
