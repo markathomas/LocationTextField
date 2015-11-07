@@ -1,9 +1,0 @@
-LocationTextField is an add-on that geocodes addresses using a configurable geocoder.  Any class implementing
-org.vaadin.addons.locationtextfield.LocationProvider can be used with LocationTextField.  There are currently two LocationProvider
-implementations provided; one using Google's geocoder and the other using OpenStreetMap's Nominatim.  Adding new implementations is
-trivial.  If the geocoder find multiple results for the address the results are available to choose from in a drop-down menu.
-
-Note: It is the user's responsibility to make sure he or she abides by any rules or requirements for geocoder use.  For instance,
-Google's geocoder will not even work unless it is used in a browser with GMaps in the DOM.  OpenStreetMap has a usage limit upon
-which they will cut you off; however, MapQuest uses the OpenStreetMap code and has no limit.  MapQuest should be added next.
-
