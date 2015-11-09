@@ -1,10 +1,10 @@
 # LocationTextField Add-on for Vaadin 7
 
-LocationTextField is an UI component add-on for Vaadin 7.
-
-## Online demo
-
-Try the add-on demo at <url of the online demo>
+LocationTextField is an UI component add-on for Vaadin 7 that geocodes addresses using a configurable geocoder.
+Any class implementing org.vaadin.addons.locationtextfield.LocationProvider can be used with LocationTextField.
+There are currently two LocationProvider implementations provided; one using Google's geocoder and the other using
+OpenStreetMap's Nominatim. Adding new implementations is trivial. Results for the geocoded address are available to
+choose from in a drop-down menu.
 
 ## Download release
 
@@ -12,7 +12,7 @@ Official releases of this add-on are available at Vaadin Directory. For Maven in
 
 ## Building and running demo
 
-git clone <url of the LocationTextField repository>
+git clone https://github.com/markathomas/LocationTextField.git
 mvn clean install
 cd demo
 mvn jetty:run
@@ -32,7 +32,7 @@ For further development of this add-on, the following tool-chain is recommended:
 
 Choose File > Import... > Existing Maven Projects
 
-Note that Eclipse may give "Plugin execution not covered by lifecycle configuration" errors for pom.xml. Use "Permanently mark goal resources in pom.xml as ignored in Eclipse build" quick-fix to mark these errors as permanently ignored in your project. Do not worry, the project still works fine. 
+Note that Eclipse may give "Plugin execution not covered by lifecycle configuration" errors for pom.xml. Use "Permanently mark goal resources in pom.xml as ignored in Eclipse build" quick-fix to mark these errors as permanently ignored in your project. Do not worry, the project still works fine.
 
 ### Debugging server-side
 
@@ -44,26 +44,19 @@ To debug project and make code modifications on the fly in the server-side, righ
 
 ### Debugging client-side
 
-The most common way of debugging and making changes to the client-side code is dev-mode. To create debug configuration for it, open locationtextfield-demo project properties and click "Create Development Mode Launch" button on the Vaadin tab. Right-click newly added "GWT development mode for locationtextfield-demo.launch" and choose Debug As > Debug Configurations... Open up Classpath tab for the development mode configuration and choose User Entries. Click Advanced... and select Add Folders. Choose Java and Resources under locationtextfield/src/main and click ok. Now you are ready to start debugging the client-side code by clicking debug. Click Launch Default Browser button in the GWT Development Mode in the launched application. Now you can modify and breakpoints to client-side classes and see changes by reloading the web page. 
+The most common way of debugging and making changes to the client-side code is dev-mode. To create debug configuration for it, open locationtextfield-demo project properties and click "Create Development Mode Launch" button on the Vaadin tab. Right-click newly added "GWT development mode for locationtextfield-demo.launch" and choose Debug As > Debug Configurations... Open up Classpath tab for the development mode configuration and choose User Entries. Click Advanced... and select Add Folders. Choose Java and Resources under locationtextfield/src/main and click ok. Now you are ready to start debugging the client-side code by clicking debug. Click Launch Default Browser button in the GWT Development Mode in the launched application. Now you can modify and breakpoints to client-side classes and see changes by reloading the web page.
 
-Another way of debugging client-side is superdev mode. To enable it, uncomment devModeRedirectEnabled line from the end of DemoWidgetSet.gwt.xml located under locationtextfield-demo resources folder and compile the widgetset once by running vaadin:compile Maven target for locationtextfield-demo. Refresh locationtextfield-demo project resources by right clicking the project and choosing Refresh. Click "Create SuperDevMode Launch" button on the Vaadin tab of the locationtextfield-demo project properties panel to create superder mode code server launch configuration and modify the class path as instructed above. After starting the code server by running SuperDevMode launch as Java application, you can navigate to http://localhost:8080/locationtextfield-demo/?superdevmode. Now all code changes you do to your client side will get compiled as soon as you reload the web page. You can also access Java-sources and set breakpoints inside Chrome if you enable source maps from inspector settings. 
+Another way of debugging client-side is superdev mode. To enable it, uncomment devModeRedirectEnabled line from the end of DemoWidgetSet.gwt.xml located under locationtextfield-demo resources folder and compile the widgetset once by running vaadin:compile Maven target for locationtextfield-demo. Refresh locationtextfield-demo project resources by right clicking the project and choosing Refresh. Click "Create SuperDevMode Launch" button on the Vaadin tab of the locationtextfield-demo project properties panel to create superder mode code server launch configuration and modify the class path as instructed above. After starting the code server by running SuperDevMode launch as Java application, you can navigate to http://localhost:8080/locationtextfield-demo/?superdevmode. Now all code changes you do to your client side will get compiled as soon as you reload the web page. You can also access Java-sources and set breakpoints inside Chrome if you enable source maps from inspector settings.
 
- 
+
 ## Release notes
 
 ### Version 2.0.0
-- ...
-- ...
-
-## Roadmap
-
-This component is developed as a hobby with no public roadmap or any guarantees of upcoming releases. That said, the following features are planned for upcoming releases:
-- ...
-- ...
+- Vaadin 7 version using newer GWT SuggestBox widget
 
 ## Issue tracking
 
-The issues for this add-on are tracked on its github.com page. All bug reports and feature requests are appreciated. 
+The issues for this add-on are tracked on its github.com page. All bug reports and feature requests are appreciated.
 
 ## Contributions
 
@@ -79,7 +72,7 @@ Contributions are welcome, but there are no guarantees that they are accepted as
 
 Add-on is distributed under Apache License 2.0. For license terms, see LICENSE.txt.
 
-LocationTextField is written by <...>
+LocationTextField is written by Mark Thomas
 
 # Developer Guide
 
@@ -87,24 +80,8 @@ LocationTextField is written by <...>
 
 Here is a simple example on how to try out the add-on component:
 
-<...>
+final LocationTextField<GeocodedLocation> ltf = new LocationTextField<GeocodedLocation>(OpenStreetMapGeocoder.getInstance();
+ltf.geocode("New York City, NY")
 
-For a more comprehensive example, see src/test/java/org/vaadin/template/demo/DemoUI.java
+For a more comprehensive example, see locationtextfield-demo/src/test/java/org/vaadin/addons/ltf/demo/DemoUI.java
 
-## Features
-
-### Feature A
-
-<...>
-
-### Feature B
-
-<...>
-
-### Feature C
-
-<...>
-
-## API
-
-LocationTextField JavaDoc is available online at <...>
