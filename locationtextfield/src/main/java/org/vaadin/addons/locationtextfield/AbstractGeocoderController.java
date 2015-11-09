@@ -23,9 +23,6 @@
 
 package org.vaadin.addons.locationtextfield;
 
-import com.zybnet.autocomplete.server.AutocompleteField;
-import com.zybnet.autocomplete.server.AutocompleteQueryListener;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,23 +32,22 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AbstractGeocodingQueryListener<E extends GeocodedLocation> implements AutocompleteQueryListener<E>, Serializable {
+public class AbstractGeocoderController<E extends GeocodedLocation> implements Serializable, GeocoderController<E> {
 
     private static final long serialVersionUID = -1363264311250337780L;
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractGeocodingQueryListener.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractGeocoderController.class);
 
     private final LocationProvider<E> locationProvider;
 
-    protected AbstractGeocodingQueryListener(LocationProvider<E> locationProvider) {
+    protected AbstractGeocoderController(LocationProvider<E> locationProvider) {
         this.locationProvider = locationProvider;
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    public void handleUserQuery(AutocompleteField<E> autocompleteField, String query) {
+    public void geocode(LocationTextField<E> ltf, String query) {
         try {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Attempting to geocode query: {}", query);
@@ -60,25 +56,25 @@ public class AbstractGeocodingQueryListener<E extends GeocodedLocation> implemen
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("{} results geocoded successfully from query: {}", (results == null ? 0 : results.size()), query);
             }
-            this.handleQueryResults(autocompleteField, query, results);
+            this.handleResults(ltf, query, results);
         } catch (GeocodingException e) {
             LOGGER.error("Error geocoding query: {}", query, e);
-            this.handleQueryError(autocompleteField, query, e);
+            this.handleError(ltf, query, e);
         }
     }
 
     /**
      * Handle results of query. By default, the field is cleared of options then the new options are sorted and added.
-     * @param autocompleteField target field
+     * @param ltf target field
      * @param query the actual query from the client
      * @param results results of geocoding
      */
-    protected void handleQueryResults(AutocompleteField<E> autocompleteField, String query, Collection<E> results) {
-        autocompleteField.clearChoices();
+    protected void handleResults(LocationTextField<E> ltf, String query, Collection<E> results) {
+        ltf.reset();
+        ltf.setText(query);
         Collection<E> sorted = this.sortResults(results);
-        autocompleteField.clearChoices();
         for (E option : sorted) {
-            autocompleteField.addSuggestion(option, option.getGeocodedAddress());
+            ltf.addSuggestion(option, option.getGeocodedAddress());
         }
     }
 
@@ -100,7 +96,7 @@ public class AbstractGeocodingQueryListener<E extends GeocodedLocation> implemen
      * @param query the actual query from the client
      * @param e exception raised while geocoding query
      */
-    protected void handleQueryError(AutocompleteField<E> autocompleteField, String query, GeocodingException e) {
+    protected void handleError(LocationTextField<E> ltf, String query, GeocodingException e) {
 
     }
 }

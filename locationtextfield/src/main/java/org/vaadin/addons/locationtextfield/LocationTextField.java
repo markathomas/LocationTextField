@@ -23,19 +23,27 @@ package org.vaadin.addons.locationtextfield;
 import com.sun.org.apache.bcel.internal.util.Objects;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.ObjectProperty;
-import com.zybnet.autocomplete.server.AutocompleteField;
-import com.zybnet.autocomplete.server.AutocompleteSuggestionPickedListener;
+import com.vaadin.ui.AbstractField;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.vaadin.addons.locationtextfield.client.GeocodedLocationSuggestion;
+import org.vaadin.addons.locationtextfield.client.LocationTextFieldServerRpc;
 import org.vaadin.addons.locationtextfield.client.LocationTextFieldState;
 
-public class LocationTextField<E extends GeocodedLocation> extends AutocompleteField<E> {
+public class LocationTextField<E extends GeocodedLocation> extends AbstractField<String> {
 
     private static final long serialVersionUID = 6356456959417951791L;
 
     private Property<E> property;
+    private GeocoderController<E> geocoderController;
+    private final Map<Integer, E> items = new HashMap<Integer, E>();
     private final Set<ValueChangeListener> locationValueChangeListeners = new HashSet<ValueChangeListener>();
 
     public LocationTextField(LocationProvider<E> locationProvider) {
@@ -58,17 +66,33 @@ public class LocationTextField<E extends GeocodedLocation> extends AutocompleteF
         this.property = property;
         this.setCaption(caption);
         this.setDelay(500);
-        this.setQueryListener(new DefaultGeocodingQueryListener<E>(locationProvider));
-        super.setSuggestionPickedListener(new AutocompleteSuggestionPickedListener<E>() {
-            public void onSuggestionPicked(E suggestion) {
-                LocationTextField.this.fireLocationChanged(suggestion);
+        this.geocoderController = new DefaultGeocoderController<E>(locationProvider);
+
+        final LocationTextFieldServerRpc rpc = new LocationTextFieldServerRpc() {
+            public void geocode(String query) {
+                LocationTextField.this.geocode(query);
             }
-        });
+
+            @Override
+            public void locationSelected(GeocodedLocationSuggestion suggestion) {
+                LocationTextField.this.setText(suggestion.getDisplayString());
+                E location = LocationTextField.this.items.get(suggestion.getId());
+                LocationTextField.this.fireLocationChanged(location);
+            }
+        };
+        this.registerRpc(rpc, LocationTextFieldServerRpc.class);
     }
 
     @Override
-    public void setSuggestionPickedListener(AutocompleteSuggestionPickedListener<E> listener) {
-        throw new UnsupportedOperationException("Please use addLocationValueChangeListener(ValueChangeListener)");
+    public Class<String> getType() {
+        return String.class;
+    }
+
+    public GeocoderController<E> getGeocoderController() {
+        return this.geocoderController;
+    }
+    public void setGeocoderController(GeocoderController<E> geocoderController) {
+        this.geocoderController = geocoderController;
     }
 
     private void fireLocationChanged(E suggestion) {
@@ -111,6 +135,9 @@ public class LocationTextField<E extends GeocodedLocation> extends AutocompleteF
         }
     }
 
+    public boolean isAutoSelectionEnabled() {
+        return getState().autoSelectEnabled;
+    }
     public void setAutoSelectionEnabled(boolean autoSelectionEnabled) {
         this.getState().autoSelectEnabled = autoSelectionEnabled;
     }
@@ -120,7 +147,7 @@ public class LocationTextField<E extends GeocodedLocation> extends AutocompleteF
      */
     @SuppressWarnings("unchecked")
     public void setLocation(E location) {
-        this.clear();
+        this.reset();
         if (location != null) {
             this.addSuggestion(location, location.getGeocodedAddress());
             this.setText(location.getGeocodedAddress());
@@ -130,14 +157,14 @@ public class LocationTextField<E extends GeocodedLocation> extends AutocompleteF
     /**
      * Removes all options and resets text field
      */
-    public void clear() {
+    public void reset() {
         this.clearChoices();
         this.setText("");
     }
 
-    @Override
-    public void setText(String text) {
-        this.setText(text, false);
+    private void clearChoices() {
+        getState().suggestions = Collections.emptyList();
+        this.items.clear();
     }
 
     /**
@@ -148,30 +175,69 @@ public class LocationTextField<E extends GeocodedLocation> extends AutocompleteF
         this.setText(address, true);
     }
 
-    private void setText(String text, boolean geocodeIfDifferent) {
+    public String getText() {
+        return getState().text;
+    }
+    public void setText(String text) {
+        this.setText(text, false);
+    }
+
+    protected void setText(String text, boolean geocodeIfDifferent) {
         if (!Objects.equals(getText(), text)) {
-            super.setText(text);
+            this.getState().text = text;
             if (geocodeIfDifferent) {
-                this.onQuery(text);
+                clearChoices();
+                this.geocoderController.geocode(this, text);
             }
         }
     }
 
     /**
      * Minimum length of text WITHOUT whitespace in order to initiate geocoding
-     * @return
      */
     public int getMinTextLength() {
         return getState().minimumQueryCharacters;
     }
     public void setMinTextLength(int minTextLength) {
         if (minTextLength != this.getMinTextLength()) {
-            this.setMinimumQueryCharacters(minTextLength);
+            getState().minimumQueryCharacters = minTextLength;
         }
     }
 
     @Override
     public LocationTextFieldState getState() {
         return (LocationTextFieldState)super.getState();
+    }
+
+    public int getDelay() {
+        return getState().delayMillis;
+    }
+    public void setDelay(int delayMillis) {
+        getState().delayMillis = delayMillis;
+    }
+
+    public int getTabIndex() {
+        return getState().tabIndex;
+    }
+    public void setTabIndex(int tabIdx) {
+        getState().tabIndex = tabIdx;
+    }
+
+    public boolean isEnabled() {
+        return getState().enabled;
+    }
+    public void setEnabled(boolean enabled) {
+        getState().enabled = enabled;
+    }
+
+    public void addSuggestion(E id, String title) {
+        int index = getState().suggestions.size();
+        this.items.put(index, id);
+        List<GeocodedLocationSuggestion> newSuggestionList = new ArrayList<GeocodedLocationSuggestion>(getState().suggestions);
+        GeocodedLocationSuggestion suggestion = new GeocodedLocationSuggestion();
+        suggestion.setId(index);
+        suggestion.setDisplayString(title);
+        newSuggestionList.add(suggestion);
+        getState().suggestions = newSuggestionList;
     }
 }

@@ -1,3 +1,4 @@
+
 /*
  * Copyright (C) 2015 Elihu, LLC. All rights reserved.
  *
@@ -17,19 +18,17 @@
  * limitations under the License.
  */
 
-package org.vaadin.addons.locationtextfield.client;
+package org.vaadin.addons.locationtextfield;
 
-import com.vaadin.shared.AbstractFieldState;
-import com.vaadin.shared.annotations.DelegateToWidget;
+/**
+ * Default geocoding query listener sticking with all the defaults
+ * @param <E> type of geocoding result
+ */
+public class DefaultGeocoderController<E extends GeocodedLocation> extends AbstractGeocoderController<E> {
 
-import java.util.Collections;
-import java.util.List;
+    private static final long serialVersionUID = -1200986877452048060L;
 
-public class LocationTextFieldState extends AbstractFieldState {
-    public String text;
-    public List<GeocodedLocationSuggestion> suggestions = Collections.emptyList();
-    public int delayMillis = 300;
-    @DelegateToWidget
-    public int minimumQueryCharacters = 3;
-    public boolean autoSelectEnabled = true;
+    public DefaultGeocoderController(LocationProvider<E> locationProvider) {
+        super(locationProvider);
+    }
 }

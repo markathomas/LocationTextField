@@ -20,14 +20,29 @@
 package org.vaadin.addons.locationtextfield.client;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.user.client.ui.SuggestOracle;
 import com.vaadin.client.annotations.OnStateChange;
+import com.vaadin.client.communication.RpcProxy;
+import com.vaadin.client.ui.AbstractComponentConnector;
 import com.vaadin.shared.ui.Connect;
-import com.zybnet.autocomplete.client.AutocompleteConnector;
 
 import org.vaadin.addons.locationtextfield.LocationTextField;
 
 @Connect(LocationTextField.class)
-public class LocationTextFieldConnector extends AutocompleteConnector {
+public class LocationTextFieldConnector extends AbstractComponentConnector
+  implements VLocationTextField.GeocodeListener, VLocationTextField.TextChangeListener, SelectionHandler<SuggestOracle.Suggestion> {
+
+    private final LocationTextFieldServerRpc serverRpc;
+    private GeocodedLocationSuggestion selectedSuggestion;
+
+    public LocationTextFieldConnector() {
+        this.serverRpc = RpcProxy.create(LocationTextFieldServerRpc.class, this);
+        getWidget().setGeocodeListener(this);
+        getWidget().addSelectionHandler(this);
+        getWidget().addTextChangeHandler(this);
+    }
 
     @Override
     protected VLocationTextField createWidget() {
@@ -46,7 +61,52 @@ public class LocationTextFieldConnector extends AutocompleteConnector {
 
     @OnStateChange("autoSelectEnabled")
     private void setAutoSelectEnabled() {
-        getWidget().getSuggestBox().setAutoSelectEnabled(getState().autoSelectEnabled);
+        getWidget().setAutoSelectEnabled(getState().autoSelectEnabled);
     }
 
+    @OnStateChange("suggestions")
+    private void updateSuggestions() {
+        getWidget().setSuggestions(getState().suggestions);
+    }
+
+    @OnStateChange("delayMillis")
+    private void updateDelayMillis() {
+        getWidget().setDelayMillis(getState().delayMillis);
+    }
+
+    @OnStateChange("tabIndex")
+    private void setTabIndex() {
+        getWidget().setTabIndex(getState().tabIndex);
+    }
+
+    @OnStateChange("enabled")
+    private void setEnabled() {
+        getWidget().setEnabled(getState().enabled);
+    }
+
+    @OnStateChange("text")
+    private void setText() {
+        getWidget().setDisplayedText(getState().text);
+    }
+
+    @Override
+    public void handleGeocode(String query) {
+        RpcProxy.create(LocationTextFieldServerRpc.class, this).geocode(query);
+    }
+
+    @Override
+    public void onSelection(SelectionEvent<SuggestOracle.Suggestion> event) {
+        GeocodedLocationSuggestion suggestion =
+          ((GeocodedLocationOracleSuggestion)event.getSelectedItem()).getGeocodedLocationSuggestion();
+        if (suggestion != null && !suggestion.equals(this.selectedSuggestion)) {
+            this.serverRpc.locationSelected(suggestion);
+            this.selectedSuggestion = suggestion;
+            getWidget().skipNextEnter = true;
+        }
+    }
+
+    @Override
+    public void onTextChange(String text) {
+        getState().text = text;
+    }
 }

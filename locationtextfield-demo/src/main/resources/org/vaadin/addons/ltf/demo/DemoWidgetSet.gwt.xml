@@ -55,5 +55,5 @@
 
     <inherits name="org.vaadin.addons.locationtextfield.LocationTextFieldWidgetSet" />
 
-    <inherits name="com.zybnet.autocomplete.AutocompleteWidgetSet" />
+    
 </module>

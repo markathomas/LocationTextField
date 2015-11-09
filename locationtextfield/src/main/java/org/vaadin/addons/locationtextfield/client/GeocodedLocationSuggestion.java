@@ -19,17 +19,24 @@
 
 package org.vaadin.addons.locationtextfield.client;
 
-import com.vaadin.shared.AbstractFieldState;
-import com.vaadin.shared.annotations.DelegateToWidget;
+import java.io.Serializable;
 
-import java.util.Collections;
-import java.util.List;
+public class GeocodedLocationSuggestion implements Serializable {
 
-public class LocationTextFieldState extends AbstractFieldState {
-    public String text;
-    public List<GeocodedLocationSuggestion> suggestions = Collections.emptyList();
-    public int delayMillis = 300;
-    @DelegateToWidget
-    public int minimumQueryCharacters = 3;
-    public boolean autoSelectEnabled = true;
+    private Integer id;
+    private String displayString;
+
+    public Integer getId() {
+        return id;
+    }
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getDisplayString() {
+        return displayString;
+    }
+    public void setDisplayString(String displayString) {
+        this.displayString = displayString;
+    }
 }

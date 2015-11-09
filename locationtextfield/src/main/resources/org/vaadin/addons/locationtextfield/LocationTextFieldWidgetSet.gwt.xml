@@ -22,7 +22,10 @@
     <!-- WS Compiler: manually edited -->
 
     <!-- Inherit DefaultWidgetSet -->
+    <inherits name='com.google.gwt.user.theme.standard.Standard'/>
     <inherits name="com.vaadin.DefaultWidgetSet" />
-    <inherits name="com.zybnet.autocomplete.AutocompleteWidgetSet" />
+    <stylesheet src="locationtextfield/styles.css"/>
+
+    <source path="client"/>
 
 </module>

@@ -1,4 +1,3 @@
-
 /*
  * Copyright (C) 2015 Elihu, LLC. All rights reserved.
  *
@@ -18,17 +17,13 @@
  * limitations under the License.
  */
 
-package org.vaadin.addons.locationtextfield;
+package org.vaadin.addons.locationtextfield.client;
 
-/**
- * Default geocoding query listener sticking with all the defaults
- * @param <E> type of geocoding result
- */
-public class DefaultGeocodingQueryListener<E extends GeocodedLocation> extends AbstractGeocodingQueryListener<E> {
+import com.vaadin.shared.communication.ServerRpc;
 
-    private static final long serialVersionUID = -1200986877452048060L;
+public interface LocationTextFieldServerRpc extends ServerRpc {
 
-    public DefaultGeocodingQueryListener(LocationProvider<E> locationProvider) {
-        super(locationProvider);
-    }
+    void geocode(String query);
+    void locationSelected(GeocodedLocationSuggestion suggestion);
+
 }

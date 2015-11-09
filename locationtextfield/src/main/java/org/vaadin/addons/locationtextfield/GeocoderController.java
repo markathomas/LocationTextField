@@ -17,19 +17,13 @@
  * limitations under the License.
  */
 
-package org.vaadin.addons.locationtextfield.client;
+package org.vaadin.addons.locationtextfield;
 
-import com.vaadin.shared.AbstractFieldState;
-import com.vaadin.shared.annotations.DelegateToWidget;
+/**
+ * This class ia responsible for
+ * @param <E>
+ */
+public interface GeocoderController<E extends GeocodedLocation> {
 
-import java.util.Collections;
-import java.util.List;
-
-public class LocationTextFieldState extends AbstractFieldState {
-    public String text;
-    public List<GeocodedLocationSuggestion> suggestions = Collections.emptyList();
-    public int delayMillis = 300;
-    @DelegateToWidget
-    public int minimumQueryCharacters = 3;
-    public boolean autoSelectEnabled = true;
+    void geocode(LocationTextField<E> ltf, String query);
 }

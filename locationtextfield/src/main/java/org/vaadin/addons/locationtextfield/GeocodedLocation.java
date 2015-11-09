@@ -182,6 +182,10 @@ public class GeocodedLocation implements Serializable, Comparable<GeocodedLocati
         this.type = type;
     }
 
+    public String getDisplayString() {
+        return this.getGeocodedAddress();
+    }
+
     @Override
     public String toString() {
         return getGeocodedAddress();
@@ -191,8 +195,8 @@ public class GeocodedLocation implements Serializable, Comparable<GeocodedLocati
     public int compareTo(GeocodedLocation o) {
         if (o == null)
             return -1;
-        String loc1 = this.getGeocodedAddress();
-        String loc2 = o.getGeocodedAddress();
+        String loc1 = this.getDisplayString();
+        String loc2 = o.getDisplayString();
         if (Objects.equals(loc1, loc2)) {
             return 0;
         } else if (loc1 == null) {

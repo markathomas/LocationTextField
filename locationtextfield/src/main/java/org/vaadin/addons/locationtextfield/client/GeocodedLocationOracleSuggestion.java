@@ -19,17 +19,30 @@
 
 package org.vaadin.addons.locationtextfield.client;
 
-import com.vaadin.shared.AbstractFieldState;
-import com.vaadin.shared.annotations.DelegateToWidget;
+import com.google.gwt.user.client.ui.SuggestOracle;
 
-import java.util.Collections;
-import java.util.List;
+public class GeocodedLocationOracleSuggestion implements SuggestOracle.Suggestion {
 
-public class LocationTextFieldState extends AbstractFieldState {
-    public String text;
-    public List<GeocodedLocationSuggestion> suggestions = Collections.emptyList();
-    public int delayMillis = 300;
-    @DelegateToWidget
-    public int minimumQueryCharacters = 3;
-    public boolean autoSelectEnabled = true;
+    private final String displayString;
+    private final GeocodedLocationSuggestion geocodedLocationSuggestion;
+
+    public GeocodedLocationOracleSuggestion(GeocodedLocationSuggestion geocodedLocationSuggestion) {
+        this.geocodedLocationSuggestion = geocodedLocationSuggestion;
+        this.displayString = geocodedLocationSuggestion.getDisplayString();
+    }
+
+    @Override
+    public String getDisplayString() {
+        return this.displayString;
+    }
+
+    @Override
+    public String getReplacementString() {
+        return this.displayString;
+    }
+
+    public GeocodedLocationSuggestion getGeocodedLocationSuggestion() {
+        return this.geocodedLocationSuggestion;
+    }
+
 }
