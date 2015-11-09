@@ -85,6 +85,12 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
         if (builder.text != null) {
             setText(builder.text);
         }
+        if (builder.width != null) {
+            this.setWidth(builder.width);
+        }
+        if (builder.height != null) {
+            this.setHeight(builder.height);
+        }
         if (builder.suggestions != null) {
             for (E suggestion : builder.suggestions) {
                 this.addSuggestion(suggestion, suggestion.getDisplayString());
@@ -97,6 +103,7 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
             setMinimumQueryCharacters(builder.minimumQueryCharacters);
         }
         setAutoSelectionEnabled(builder.autoSelectEnabled);
+        setImmediate(builder.immediate);
     }
 
     public static <E extends GeocodedLocation> Builder<E> newBuilder() {
@@ -319,11 +326,14 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
         private int delayMillis = 500;
         private int minimumQueryCharacters = 5;
         private boolean autoSelectEnabled = true;
+        private String width;
+        private String height;
+        private boolean immediate;
 
         private Builder() {
         }
 
-        public Builder withInitialValue(E initialValue) {
+        public Builder<E> withInitialValue(E initialValue) {
             this.initialValue = initialValue;
             if (initialValue != null) {
                 this.property = new ObjectProperty<E>(initialValue);
@@ -331,32 +341,42 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
             return this;
         }
 
-        public Builder withLocationProvider(LocationProvider<E> locationProvider) {
+        public Builder<E> withLocationProvider(LocationProvider<E> locationProvider) {
             this.locationProvider = locationProvider;
             return this;
         }
 
-        public Builder withProperty(Property<E> property) {
+        public Builder<E> withProperty(Property<E> property) {
             this.property = property;
             return this;
         }
 
-        public Builder withGeocoderController(GeocoderController<E> geocoderController) {
+        public Builder<E> withGeocoderController(GeocoderController<E> geocoderController) {
             this.geocoderController = geocoderController;
             return this;
         }
 
-        public Builder withText(String text) {
+        public Builder<E> withText(String text) {
             this.text = text;
             return this;
         }
 
-        public Builder withCaption(String caption) {
+        public Builder<E> withCaption(String caption) {
             this.caption = caption;
             return this;
         }
 
-        public Builder withSuggestions(List<E> suggestions) {
+        public Builder<E> withWidth(String width) {
+            this.width = width;
+            return this;
+        }
+
+        public Builder<E> withHeight(String height) {
+            this.height = height;
+            return this;
+        }
+
+        public Builder<E> withSuggestions(List<E> suggestions) {
             if (suggestions == null) {
                 suggestions = Collections.emptyList();
             }
@@ -364,7 +384,7 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
             return this;
         }
 
-        public Builder withDelayMillis(int delayMillis) {
+        public Builder<E> withDelayMillis(int delayMillis) {
             if (delayMillis < 0) {
                 throw new IllegalArgumentException("delayMillis must be greater than zero");
             }
@@ -372,7 +392,7 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
             return this;
         }
 
-        public Builder withMinimumQueryCharacters(int minimumQueryCharacters) {
+        public Builder<E> withMinimumQueryCharacters(int minimumQueryCharacters) {
             if (minimumQueryCharacters < 1) {
                 throw new IllegalArgumentException("minimumQueryCharacters must be greater than one");
             }
@@ -380,8 +400,13 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
             return this;
         }
 
-        public Builder withAutoSelectEnabled(boolean autoSelectEnabled) {
+        public Builder<E> withAutoSelectEnabled(boolean autoSelectEnabled) {
             this.autoSelectEnabled = autoSelectEnabled;
+            return this;
+        }
+
+        public Builder<E> withImmediate(boolean immediate) {
+            this.immediate = immediate;
             return this;
         }
 
