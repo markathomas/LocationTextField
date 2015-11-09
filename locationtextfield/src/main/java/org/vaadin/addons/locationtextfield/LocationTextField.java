@@ -47,23 +47,17 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
     private final Set<ValueChangeListener> locationValueChangeListeners = new HashSet<ValueChangeListener>();
 
     public LocationTextField(LocationProvider<E> locationProvider) {
-        this(locationProvider, null, null);
+        this(locationProvider, null, null, null);
     }
-    public LocationTextField(LocationProvider<E> locationProvider, String caption) {
-        this(locationProvider, null, caption);
-    }
-    public LocationTextField(LocationProvider<E> locationProvider, Property<E> property) {
-        this(locationProvider, property, null);
-    }
-    public LocationTextField(LocationProvider<E> locationProvider, E initialValue) {
-        this(locationProvider, initialValue == null ? null : new ObjectProperty<E>(initialValue),
-          initialValue == null ? null : initialValue.getGeocodedAddress());
-    }
-    public LocationTextField(LocationProvider<E> locationProvider, Property<E> property, String caption) {
+
+    private LocationTextField(LocationProvider<E> locationProvider, E initialValue, Property<E> property, String caption) {
         if (locationProvider == null) {
             throw new IllegalArgumentException("LocationProvider cannot be null");
         }
         this.property = property;
+        if (initialValue != null) {
+            this.setLocation(initialValue);
+        }
         this.setCaption(caption);
         this.setDelay(500);
         this.geocoderController = new DefaultGeocoderController<E>(locationProvider);
@@ -81,6 +75,32 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
             }
         };
         this.registerRpc(rpc, LocationTextFieldServerRpc.class);
+    }
+
+    private LocationTextField(Builder<E> builder) {
+        this(builder.locationProvider, builder.initialValue, builder.property, builder.caption);
+        if (builder.geocoderController != null) {
+            setGeocoderController(builder.geocoderController);
+        }
+        if (builder.text != null) {
+            setText(builder.text);
+        }
+        if (builder.suggestions != null) {
+            for (E suggestion : builder.suggestions) {
+                this.addSuggestion(suggestion, suggestion.getDisplayString());
+            }
+        }
+        if (builder.delayMillis > 0) {
+            setDelay(builder.delayMillis);
+        }
+        if (builder.minimumQueryCharacters > 0) {
+            setMinimumQueryCharacters(builder.minimumQueryCharacters);
+        }
+        setAutoSelectionEnabled(builder.autoSelectEnabled);
+    }
+
+    public static <E extends GeocodedLocation> Builder<E> newBuilder() {
+        return new Builder<E>();
     }
 
     @Override
@@ -106,10 +126,7 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
             return;
         }
 
-        if (this.property == null) {
-            this.property = new ObjectProperty<E>(suggestion);
-        }
-        this.property.setValue(suggestion);
+        this.updateProperty(suggestion);
 
         Set<ValueChangeListener> someListeners;
         synchronized (this.locationValueChangeListeners) {
@@ -128,6 +145,13 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
                 listener.valueChange(event);
             }
         }
+    }
+
+    private void updateProperty(E suggestion) {
+        if (this.property == null) {
+            this.property = new ObjectProperty<E>(suggestion);
+        }
+        this.property.setValue(suggestion);
     }
 
     /**
@@ -167,6 +191,7 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
     public void setLocation(E location) {
         this.reset();
         if (location != null) {
+            this.updateProperty(location);
             this.addSuggestion(location, location.getGeocodedAddress());
             this.setText(location.getGeocodedAddress());
         }
@@ -218,11 +243,11 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
      * Minimum length of displayText WITHOUT whitespace in order to initiate geocoding. Defaults to 3 characters.
      * @return minimum number of characters required to perform geocoding on user input
      */
-    public int getMinTextLength() {
+    public int getMinimumQueryCharacters() {
         return getState().minimumQueryCharacters;
     }
-    public void setMinTextLength(int minTextLength) {
-        if (minTextLength != this.getMinTextLength()) {
+    public void setMinimumQueryCharacters(int minTextLength) {
+        if (minTextLength != this.getMinimumQueryCharacters()) {
             getState().minimumQueryCharacters = minTextLength;
         }
     }
@@ -280,5 +305,88 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
         suggestion.setDisplayString(title);
         newSuggestionList.add(suggestion);
         getState().suggestions = newSuggestionList;
+    }
+
+    public static final class Builder<E extends GeocodedLocation> {
+
+        private E initialValue;
+        private LocationProvider<E> locationProvider;
+        private Property<E> property;
+        private GeocoderController<E> geocoderController;
+        private String text;
+        private String caption;
+        private List<E> suggestions = Collections.emptyList();
+        private int delayMillis = 500;
+        private int minimumQueryCharacters = 5;
+        private boolean autoSelectEnabled = true;
+
+        private Builder() {
+        }
+
+        public Builder withInitialValue(E initialValue) {
+            this.initialValue = initialValue;
+            if (initialValue != null) {
+                this.property = new ObjectProperty<E>(initialValue);
+            }
+            return this;
+        }
+
+        public Builder withLocationProvider(LocationProvider<E> locationProvider) {
+            this.locationProvider = locationProvider;
+            return this;
+        }
+
+        public Builder withProperty(Property<E> property) {
+            this.property = property;
+            return this;
+        }
+
+        public Builder withGeocoderController(GeocoderController<E> geocoderController) {
+            this.geocoderController = geocoderController;
+            return this;
+        }
+
+        public Builder withText(String text) {
+            this.text = text;
+            return this;
+        }
+
+        public Builder withCaption(String caption) {
+            this.caption = caption;
+            return this;
+        }
+
+        public Builder withSuggestions(List<E> suggestions) {
+            if (suggestions == null) {
+                suggestions = Collections.emptyList();
+            }
+            this.suggestions = suggestions;
+            return this;
+        }
+
+        public Builder withDelayMillis(int delayMillis) {
+            if (delayMillis < 0) {
+                throw new IllegalArgumentException("delayMillis must be greater than zero");
+            }
+            this.delayMillis = delayMillis;
+            return this;
+        }
+
+        public Builder withMinimumQueryCharacters(int minimumQueryCharacters) {
+            if (minimumQueryCharacters < 1) {
+                throw new IllegalArgumentException("minimumQueryCharacters must be greater than one");
+            }
+            this.minimumQueryCharacters = minimumQueryCharacters;
+            return this;
+        }
+
+        public Builder withAutoSelectEnabled(boolean autoSelectEnabled) {
+            this.autoSelectEnabled = autoSelectEnabled;
+            return this;
+        }
+
+        public LocationTextField<E> build() {
+            return new LocationTextField<E>(this);
+        }
     }
 }
