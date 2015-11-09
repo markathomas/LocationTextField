@@ -40,9 +40,9 @@ public class GeocodedLocationSuggestionsDisplay extends SuggestBox.DefaultSugges
     @Override
     public PopupPanel createPopup() {
         VOverlay popup = GWT.create(VOverlay.class);
-        popup.setOwner(widget);
+        popup.setOwner(this.widget);
         popup.setStyleName("gwt-SuggestBoxPopup");
-        popup.addStyleName("locationtextfield");
+        popup.addStyleName(VLocationTextField.CLASSNAME);
         popup.setAutoHideEnabled(true);
         return popup;
     }
@@ -50,9 +50,6 @@ public class GeocodedLocationSuggestionsDisplay extends SuggestBox.DefaultSugges
     @Override
     public void showSuggestions(final SuggestBox suggestBox, final Collection<? extends SuggestOracle.Suggestion> suggestions,
       final boolean isDisplayStringHTML, final boolean isAutoSelectEnabled, final SuggestBox.SuggestionCallback callback) {
-        // This horrible hack is copied from VFilterSelect
-        // Apparently, Vaadin layouts mess with paddings and margins, so we need to
-        // wait until the layout code has executed before computing the left/top offsets
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             @Override
             public void execute() {

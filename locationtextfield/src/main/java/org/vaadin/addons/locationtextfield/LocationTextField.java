@@ -88,6 +88,12 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
         return String.class;
     }
 
+    /**
+     * Specifies the controller for bridging between user input and the suggestions for this field.  This is the object that invokes
+     * the {@link LocationProvider} to geocode user input. It is then responsible for updating the field's collection of
+     * suggestions.
+     * @return controller object
+     */
     public GeocoderController<E> getGeocoderController() {
         return this.geocoderController;
     }
@@ -124,17 +130,30 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
         }
     }
 
+    /**
+     * Adds a listener to receive changes to the selected location
+     * @param listener a listener for changes to the selected location
+     */
     public void addLocationValueChangeListener(ValueChangeListener listener) {
         synchronized (this.locationValueChangeListeners) {
             this.locationValueChangeListeners.add(listener);
         }
     }
+
+    /**
+     * Removed a listener from receiving changes to the selected location
+     * @param listener a listener for changes to the selected location
+     */
     public void removeLocationValueChangeListener(ValueChangeListener listener) {
         synchronized (this.locationValueChangeListeners) {
             this.locationValueChangeListeners.remove(listener);
         }
     }
 
+    /**
+     * Specifies whether or not auto-selection is enabled. True by default.
+     * @return whether or not auto-selection is enabled
+     */
     public boolean isAutoSelectionEnabled() {
         return getState().autoSelectEnabled;
     }
@@ -145,7 +164,6 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
     /**
      * Convenience method for explicitly setting the location
      */
-    @SuppressWarnings("unchecked")
     public void setLocation(E location) {
         this.reset();
         if (location != null) {
@@ -155,7 +173,7 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
     }
 
     /**
-     * Removes all options and resets text field
+     * Removes all options and resets text field value to an empty string
      */
     public void reset() {
         this.clearChoices();
@@ -175,6 +193,10 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
         this.setText(address, true);
     }
 
+    /**
+     * The value currently shown in the field on the GUI
+     * @return value currently shown in the field on the GUI
+     */
     public String getText() {
         return getState().text;
     }
@@ -193,7 +215,8 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
     }
 
     /**
-     * Minimum length of text WITHOUT whitespace in order to initiate geocoding
+     * Minimum length of displayText WITHOUT whitespace in order to initiate geocoding. Defaults to 3 characters.
+     * @return minimum number of characters required to perform geocoding on user input
      */
     public int getMinTextLength() {
         return getState().minimumQueryCharacters;
@@ -209,6 +232,10 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
         return (LocationTextFieldState)super.getState();
     }
 
+    /**
+     * Specifies the delay (in milliseconds) between when the user types a character and the geocoding is performed
+     * @return start delay in milliseconds
+     */
     public int getDelay() {
         return getState().delayMillis;
     }
@@ -216,6 +243,10 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
         getState().delayMillis = delayMillis;
     }
 
+    /**
+     * Specifies the tab index of this field in the DOM
+     * @return configured tab index
+     */
     public int getTabIndex() {
         return getState().tabIndex;
     }
@@ -223,6 +254,10 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
         getState().tabIndex = tabIdx;
     }
 
+    /**
+     * Specifies whether or not this field is enabled. Disable fields will accept not input and will appear 'greyed out'.
+     * @return whether or not this field is enabled
+     */
     public boolean isEnabled() {
         return getState().enabled;
     }
@@ -230,6 +265,12 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
         getState().enabled = enabled;
     }
 
+    /**
+     * Adds a suggested location to the field.
+     * @param id a geocoded location
+     * @param title how the location should be shown in the GUI. By default this value is set to
+     *   {@link GeocodedLocation#getDisplayString()}
+     */
     public void addSuggestion(E id, String title) {
         int index = getState().suggestions.size();
         this.items.put(index, id);

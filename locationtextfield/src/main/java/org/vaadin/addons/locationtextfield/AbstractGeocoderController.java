@@ -92,7 +92,7 @@ public class AbstractGeocoderController<E extends GeocodedLocation> implements S
     /**
      * This method handles any exception while performing the geocoding. By default it simply does nothing and moves on.
      * Sub-classes may wish to perform other options such as clearing the available choices, setting a default/override value, etc.
-     * @param autocompleteField target field
+     * @param ltf target field
      * @param query the actual query from the client
      * @param e exception raised while geocoding query
      */

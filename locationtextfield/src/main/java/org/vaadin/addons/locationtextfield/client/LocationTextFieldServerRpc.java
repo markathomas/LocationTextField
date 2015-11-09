@@ -23,7 +23,16 @@ import com.vaadin.shared.communication.ServerRpc;
 
 public interface LocationTextFieldServerRpc extends ServerRpc {
 
+    /**
+     * RPC call to server to perform geocoding
+     * @param query user-specified address string
+     */
     void geocode(String query);
+
+    /**
+     * RPC call to server to indicate which address (if any) is currently selected
+     * @param suggestion
+     */
     void locationSelected(GeocodedLocationSuggestion suggestion);
 
 }

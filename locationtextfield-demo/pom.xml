@@ -144,6 +144,11 @@
             <version>3.0.1</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.12</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -203,11 +208,16 @@
                     <extraJvmArgs>-Xmx512M -Xss1024k</extraJvmArgs>
                     <webappDirectory>${basedir}/src/main/webapp/VAADIN/widgetsets</webappDirectory>
                     <hostedWebapp>${basedir}/src/main/webapp/VAADIN/widgetsets</hostedWebapp>
+                    <deploy>${project.build.directory}/deploy</deploy>
+                    <extra>${project.build.directory}/deploy</extra>
                     <noServer>true</noServer>
                     <persistentunitcachedir>${basedir}/target/tmp/gwt-unitCache</persistentunitcachedir>
+                    <draftCompile>false</draftCompile>
                     <compileReport>true</compileReport>
+                    <style>${gwt.compile.style}</style>
                     <strict>true</strict>
                     <runTarget>http://localhost:8080/</runTarget>
+                    <localWorkers>${it.localWorkers}</localWorkers>
                 </configuration>
                 <executions>
                     <!-- You are free to mark this as permanently ignored in Eclipse -->

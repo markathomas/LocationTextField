@@ -23,9 +23,21 @@ import java.io.Serializable;
 import java.util.Collection;
 
 /**
- * Inteface providing {@link org.vaadin.addons.locationtextfield.GeocodedLocation}s based on an address
+ * Interface providing {@link org.vaadin.addons.locationtextfield.GeocodedLocation}s based on an address
  */
 public interface LocationProvider<T extends GeocodedLocation> extends Serializable {
+
+    /**
+     * Geocodes the provided address
+     * @param address String representation of a physical address
+     * @return collection of geocoding results
+     * @throws GeocodingException
+     */
     Collection<T> geocode(String address) throws GeocodingException;
+
+    /**
+     * Set max number of results to return
+     * @param limit max number of results
+     */
     void setLimit(int limit);
 }

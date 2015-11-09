@@ -20,10 +20,16 @@
 package org.vaadin.addons.locationtextfield;
 
 /**
- * This class ia responsible for
- * @param <E>
+ * This class iw responsible for invoking the geocoding operation, handling the results and/or an error, and updating the target
+ * field with the results.
  */
 public interface GeocoderController<E extends GeocodedLocation> {
 
+    /**
+     * Invoke the geocoding operation then handling the results and/or an error, and then finally updating the target
+     * field with the results
+     * @param ltf target field
+     * @param query address to query
+     */
     void geocode(LocationTextField<E> ltf, String query);
 }

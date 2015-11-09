@@ -31,7 +31,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * {@link org.vaadin.addons.locationtextfield.LocationProvider} which uses OpenStreetMap
+ * {@link org.vaadin.addons.locationtextfield.LocationProvider} which uses OpenStreetMap's Nominatim service
  */
 public final class OpenStreetMapGeocoder extends URLConnectionGeocoder<GeocodedLocation> {
 
