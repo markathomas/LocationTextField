@@ -58,7 +58,7 @@ public class DemoUI extends UI
 
         final OpenStreetMapGeocoder geocoder = OpenStreetMapGeocoder.getInstance();
         geocoder.setLimit(25);
-        final LocationTextField<GeocodedLocation> ltf = new LocationTextField<GeocodedLocation>(geocoder);
+        final LocationTextField<GeocodedLocation> ltf = new LocationTextField<GeocodedLocation>(geocoder, GeocodedLocation.class);
         ltf.setCaption("Address: ");
         ltf.setWidth("100%");
         ltf.setImmediate(true);

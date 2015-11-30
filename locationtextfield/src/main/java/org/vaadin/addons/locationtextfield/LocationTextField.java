@@ -20,7 +20,6 @@
 
 package org.vaadin.addons.locationtextfield;
 
-import com.sun.org.apache.bcel.internal.util.Objects;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.ObjectProperty;
 import com.vaadin.ui.AbstractField;
@@ -31,6 +30,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.vaadin.addons.locationtextfield.client.GeocodedLocationSuggestion;
@@ -41,20 +41,32 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
 
     private static final long serialVersionUID = 6356456959417951791L;
 
+    private Class<E> typeClass;
     private Property<E> property;
     private GeocoderController<E> geocoderController;
     private final Map<Integer, E> items = new HashMap<Integer, E>();
     private final Set<ValueChangeListener> locationValueChangeListeners = new HashSet<ValueChangeListener>();
 
-    public LocationTextField(LocationProvider<E> locationProvider) {
-        this(locationProvider, null, null, null);
+    public LocationTextField(LocationProvider<E> locationProvider, Class<E> typeClass) {
+        this(locationProvider, typeClass, null, null, null);
     }
 
-    private LocationTextField(LocationProvider<E> locationProvider, E initialValue, Property<E> property, String caption) {
+    private LocationTextField(LocationProvider<E> locationProvider, Class<E> typeClass, E initialValue, Property<E> property,
+      String caption) {
         if (locationProvider == null) {
-            throw new IllegalArgumentException("LocationProvider cannot be null");
+            throw new IllegalArgumentException("locationProvider cannot be null");
+        }
+        if (typeClass == null) {
+            throw new IllegalArgumentException("typeClass cannot be null");
+        }
+
+        this.typeClass = typeClass;
+
+        if (property == null) {
+            property = new ObjectProperty<E>(null, typeClass);
         }
         this.property = property;
+
         if (initialValue != null) {
             this.setLocation(initialValue);
         }
@@ -78,7 +90,7 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
     }
 
     private LocationTextField(Builder<E> builder) {
-        this(builder.locationProvider, builder.initialValue, builder.property, builder.caption);
+        this(builder.locationProvider, builder.typeClass, builder.initialValue, builder.property, builder.caption);
         if (builder.geocoderController != null) {
             setGeocoderController(builder.geocoderController);
         }
@@ -203,6 +215,9 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
             this.setText(location.getGeocodedAddress());
         }
     }
+    public E getLocation() {
+        return this.property.getValue();
+    }
 
     /**
      * Removes all options and resets text field value to an empty string
@@ -316,6 +331,7 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
 
     public static final class Builder<E extends GeocodedLocation> {
 
+        private Class<E> typeClass;
         private E initialValue;
         private LocationProvider<E> locationProvider;
         private Property<E> property;
@@ -333,10 +349,17 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
         private Builder() {
         }
 
+        public Builder<E> withType(Class<E> typeClass) {
+            this.typeClass = typeClass;
+            return this;
+        }
+
+        @SuppressWarnings("unchecked")
         public Builder<E> withInitialValue(E initialValue) {
             this.initialValue = initialValue;
             if (initialValue != null) {
                 this.property = new ObjectProperty<E>(initialValue);
+                this.typeClass = (Class<E>)initialValue.getClass();
             }
             return this;
         }
