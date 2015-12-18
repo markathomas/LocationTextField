@@ -19,7 +19,7 @@
 
 package org.vaadin.addons.locationtextfield;
 
-import com.sun.org.apache.bcel.internal.util.Objects;
+import java.util.Objects;
 
 import java.io.Serializable;
 
