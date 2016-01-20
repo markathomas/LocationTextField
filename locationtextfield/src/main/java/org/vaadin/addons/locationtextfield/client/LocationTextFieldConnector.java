@@ -25,13 +25,13 @@ import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.ui.SuggestOracle;
 import com.vaadin.client.annotations.OnStateChange;
 import com.vaadin.client.communication.RpcProxy;
-import com.vaadin.client.ui.AbstractComponentConnector;
+import com.vaadin.client.ui.AbstractFieldConnector;
 import com.vaadin.shared.ui.Connect;
 
 import org.vaadin.addons.locationtextfield.LocationTextField;
 
 @Connect(LocationTextField.class)
-public class LocationTextFieldConnector extends AbstractComponentConnector
+public class LocationTextFieldConnector extends AbstractFieldConnector
   implements VLocationTextField.GeocodeListener, VLocationTextField.TextChangeListener, SelectionHandler<SuggestOracle.Suggestion> {
 
     private final LocationTextFieldServerRpc serverRpc;

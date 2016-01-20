@@ -70,6 +70,7 @@ public class DemoUI extends UI
         vl.addComponent(lat);
         vl.addComponent(lon);
 
+        ltf.setRequired(true);
         ltf.addLocationValueChangeListener(new Property.ValueChangeListener() {
             public void valueChange(Property.ValueChangeEvent event) {
                 GeocodedLocation loc = (GeocodedLocation)event.getProperty().getValue();
