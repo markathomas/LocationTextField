@@ -211,7 +211,6 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
         this.reset();
         if (location != null) {
             this.updateProperty(location);
-            this.addSuggestion(location, location.getGeocodedAddress());
             this.setText(location.getGeocodedAddress());
         }
     }
