@@ -91,6 +91,15 @@ public class DemoUI extends UI
         });
         vl.addComponent(b);
 
+        Button b2 = new Button("Reset LocationTextField", new Button.ClickListener() {
+            public void buttonClick(Button.ClickEvent event) {
+                ltf.reset();
+                lat.clear();
+                lon.clear();
+            }
+        });
+        vl.addComponent(b2);
+
         setContent(vl);
     }
 

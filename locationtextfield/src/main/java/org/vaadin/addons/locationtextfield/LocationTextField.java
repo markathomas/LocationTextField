@@ -224,11 +224,13 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
     public void reset() {
         this.clearChoices();
         this.setText("");
+        this.updateProperty(null);
     }
 
     private void clearChoices() {
         getState().suggestions = Collections.emptyList();
         this.items.clear();
+        markAsDirty();
     }
 
     /**
@@ -257,6 +259,7 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
                 clearChoices();
                 this.geocoderController.geocode(this, text);
             }
+            markAsDirty();
         }
     }
 
@@ -270,6 +273,7 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
     public void setMinimumQueryCharacters(int minTextLength) {
         if (minTextLength != this.getMinimumQueryCharacters()) {
             getState().minimumQueryCharacters = minTextLength;
+            markAsDirty();
         }
     }
 
@@ -287,6 +291,7 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
     }
     public void setDelay(int delayMillis) {
         getState().delayMillis = delayMillis;
+        markAsDirty();
     }
 
     /**
@@ -298,6 +303,7 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
     }
     public void setTabIndex(int tabIdx) {
         getState().tabIndex = tabIdx;
+        markAsDirty();
     }
 
     /**
@@ -309,6 +315,7 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
     }
     public void setEnabled(boolean enabled) {
         getState().enabled = enabled;
+        markAsDirty();
     }
 
     /**
@@ -326,6 +333,7 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
         suggestion.setDisplayString(title);
         newSuggestionList.add(suggestion);
         getState().suggestions = newSuggestionList;
+        markAsDirty();
     }
 
     public static final class Builder<E extends GeocodedLocation> {
