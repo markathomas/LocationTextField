@@ -21,10 +21,13 @@ package org.vaadin.addons.locationtextfield.client;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.user.client.ui.MenuItem;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.Widget;
+import com.vaadin.client.ui.VFilterSelect;
 import com.vaadin.client.ui.VOverlay;
 
 import java.util.Collection;
@@ -58,4 +61,26 @@ public class GeocodedLocationSuggestionsDisplay extends SuggestBox.DefaultSugges
             }
         });
     }
+
+    protected void moveSelectionDown() {
+        super.moveSelectionDown();
+        MenuItem selectedItem = (MenuItem) getCurrentSelection(); //child
+        Element suggestedMenu = getSuggestionMenu().getElement();  //parent
+        if(selectedItem.getElement().getOffsetTop() >= suggestedMenu.getOffsetHeight()) {
+            suggestedMenu.setScrollTop(suggestedMenu.getOffsetHeight() + selectedItem.getOffsetHeight());
+        }
+    }
+
+    protected void moveSelectionUp() {
+        super.moveSelectionUp();
+        MenuItem selectedItem = (MenuItem) getCurrentSelection(); //child
+        Element suggestedMenu = getSuggestionMenu().getElement();  //parent
+        if(selectedItem.getElement().getOffsetTop() >= suggestedMenu.getOffsetHeight()) {
+            suggestedMenu.setScrollTop(suggestedMenu.getOffsetHeight() - selectedItem.getOffsetHeight());
+        }
+    }
+
+    private native void log (String msg)/*-{
+        console.log(msg);
+    }-*/;
 }
