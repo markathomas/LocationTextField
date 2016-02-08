@@ -27,7 +27,6 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.Widget;
-import com.vaadin.client.ui.VFilterSelect;
 import com.vaadin.client.ui.VOverlay;
 
 import java.util.Collection;
@@ -79,8 +78,4 @@ public class GeocodedLocationSuggestionsDisplay extends SuggestBox.DefaultSugges
             suggestedMenu.setScrollTop(suggestedMenu.getOffsetHeight() - selectedItem.getOffsetHeight());
         }
     }
-
-    private native void log (String msg)/*-{
-        console.log(msg);
-    }-*/;
 }
