@@ -139,6 +139,10 @@ public class VLocationTextField extends Composite implements KeyUpHandler, Focus
         }
     }
 
+    public void setInputPrompt(String inputPrompt) {
+        this.textField.getElement().setAttribute("placeholder", inputPrompt);
+    }
+
     public void addSelectionHandler(SelectionHandler<SuggestOracle.Suggestion> handler) {
         this.suggestBox.addSelectionHandler(handler);
     }

@@ -62,6 +62,7 @@ public class DemoUI extends UI
         ltf.setCaption("Address: ");
         ltf.setWidth("100%");
         ltf.setImmediate(true);
+        ltf.setInputPrompt("<<Enter Address>>");
         //ltf.setAutoSelectionEnabled(false);
         vl.addComponent(ltf);
 

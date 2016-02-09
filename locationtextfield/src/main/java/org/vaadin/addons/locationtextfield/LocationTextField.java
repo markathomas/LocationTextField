@@ -318,6 +318,11 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
         markAsDirty();
     }
 
+    public void setInputPrompt(String inputPrompt) {
+        this.getState().inputPrompt = inputPrompt;
+        markAsDirty();
+    }
+
     /**
      * Adds a suggested location to the field.
      * @param id a geocoded location

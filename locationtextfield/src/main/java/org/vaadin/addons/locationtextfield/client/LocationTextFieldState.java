@@ -27,6 +27,8 @@ import java.util.List;
 
 public class LocationTextFieldState extends AbstractFieldState {
     public String text;
+    @DelegateToWidget
+    public String inputPrompt;
     public List<GeocodedLocationSuggestion> suggestions = Collections.emptyList();
     public int delayMillis = 300;
     @DelegateToWidget

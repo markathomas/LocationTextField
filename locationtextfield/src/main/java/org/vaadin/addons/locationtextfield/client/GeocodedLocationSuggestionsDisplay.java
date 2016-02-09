@@ -21,6 +21,8 @@ package org.vaadin.addons.locationtextfield.client;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.user.client.ui.MenuItem;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle;
@@ -57,5 +59,23 @@ public class GeocodedLocationSuggestionsDisplay extends SuggestBox.DefaultSugges
                   isAutoSelectEnabled, callback);
             }
         });
+    }
+
+    protected void moveSelectionDown() {
+        super.moveSelectionDown();
+        MenuItem selectedItem = (MenuItem) getCurrentSelection(); //child
+        Element suggestedMenu = getSuggestionMenu().getElement();  //parent
+        if(selectedItem.getElement().getOffsetTop() >= suggestedMenu.getOffsetHeight()) {
+            suggestedMenu.setScrollTop(suggestedMenu.getOffsetHeight() + selectedItem.getOffsetHeight());
+        }
+    }
+
+    protected void moveSelectionUp() {
+        super.moveSelectionUp();
+        MenuItem selectedItem = (MenuItem) getCurrentSelection(); //child
+        Element suggestedMenu = getSuggestionMenu().getElement();  //parent
+        if(selectedItem.getElement().getOffsetTop() >= suggestedMenu.getOffsetHeight()) {
+            suggestedMenu.setScrollTop(suggestedMenu.getOffsetHeight() - selectedItem.getOffsetHeight());
+        }
     }
 }
