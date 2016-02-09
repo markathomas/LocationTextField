@@ -21,3 +21,13 @@
     border: 2px solid #c5c5c5;
     background: white;
 }
+
+.v-locationtextfield .item {
+    padding: 1px 8px;
+    cursor: pointer;
+}
+.v-locationtextfield .item-selected {
+    text-shadow: 0 1px 0 #3b5a7a;
+    background: #5483A9;
+    color: #ffffff;
+}
