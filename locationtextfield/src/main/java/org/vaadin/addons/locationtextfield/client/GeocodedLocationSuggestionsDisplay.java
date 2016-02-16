@@ -21,6 +21,8 @@ package org.vaadin.addons.locationtextfield.client;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle;
@@ -39,6 +41,7 @@ public class GeocodedLocationSuggestionsDisplay extends SuggestBox.DefaultSugges
 
     @Override
     public PopupPanel createPopup() {
+//        return super.createPopup();
         VOverlay popup = GWT.create(VOverlay.class);
         popup.setOwner(this.widget);
         popup.setStyleName("gwt-SuggestBoxPopup");
@@ -59,21 +62,29 @@ public class GeocodedLocationSuggestionsDisplay extends SuggestBox.DefaultSugges
         });
     }
 
-    /*protected void moveSelectionDown() {
+    protected void moveSelectionDown() {
         super.moveSelectionDown();
-        MenuItem selectedItem = (MenuItem) getCurrentSelection(); //child
+        Element selectedItem = querySelector(".v-locationtextfield .item-selected").getParentElement();
         Element suggestedMenu = getSuggestionMenu().getElement();  //parent
-        if(selectedItem.getElement().getOffsetTop() >= suggestedMenu.getOffsetHeight()) {
-            suggestedMenu.setScrollTop(suggestedMenu.getOffsetHeight() + selectedItem.getOffsetHeight());
+        if(selectedItem.getOffsetTop() + selectedItem.getOffsetHeight() >= suggestedMenu.getOffsetHeight()) {
+            suggestedMenu.setScrollTop(suggestedMenu.getScrollTop() + selectedItem.getOffsetHeight());
         }
     }
 
     protected void moveSelectionUp() {
         super.moveSelectionUp();
-        MenuItem selectedItem = (MenuItem) getCurrentSelection(); //child
+        Element selectedItem = querySelector(".v-locationtextfield .item-selected").getParentElement(); //child
         Element suggestedMenu = getSuggestionMenu().getElement();  //parent
-        if(selectedItem.getElement().getOffsetTop() >= suggestedMenu.getOffsetHeight()) {
-            suggestedMenu.setScrollTop(suggestedMenu.getOffsetHeight() - selectedItem.getOffsetHeight());
+        if(selectedItem.getOffsetTop() <= suggestedMenu.getScrollTop()) {
+            suggestedMenu.setScrollTop(suggestedMenu.getScrollTop() - selectedItem.getOffsetHeight());
         }
-    }*/
+    }
+
+    public final native Element querySelector(String selectors) /*-{
+        return $doc.querySelector(selectors);
+    }-*/;
+
+    public final native void log(String msg) /*-{
+        return console.log(msg);
+    }-*/;
 }

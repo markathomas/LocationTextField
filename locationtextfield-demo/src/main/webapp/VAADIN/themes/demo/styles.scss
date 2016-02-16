@@ -53,3 +53,9 @@ $darkgreen: darken($green, 30%);
         text-align: center;
     }
 }
+
+.v-locationtextfield .popupContent div {
+    max-height: 200px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
