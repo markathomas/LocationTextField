@@ -22,7 +22,6 @@ package org.vaadin.addons.locationtextfield.client;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle;
@@ -41,7 +40,6 @@ public class GeocodedLocationSuggestionsDisplay extends SuggestBox.DefaultSugges
 
     @Override
     public PopupPanel createPopup() {
-//        return super.createPopup();
         VOverlay popup = GWT.create(VOverlay.class);
         popup.setOwner(this.widget);
         popup.setStyleName("gwt-SuggestBoxPopup");
