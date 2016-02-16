@@ -83,8 +83,4 @@ public class GeocodedLocationSuggestionsDisplay extends SuggestBox.DefaultSugges
     public final native Element querySelector(String selectors) /*-{
         return $doc.querySelector(selectors);
     }-*/;
-
-    public final native void log(String msg) /*-{
-        return console.log(msg);
-    }-*/;
 }
