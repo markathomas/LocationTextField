@@ -35,4 +35,8 @@ public interface LocationTextFieldServerRpc extends ServerRpc {
      */
     void locationSelected(GeocodedLocationSuggestion suggestion);
 
+    /**
+     * Callback to denote input has been cleared on client
+     */
+    void inputCleared();
 }

@@ -91,7 +91,7 @@ public class LocationTextFieldConnector extends AbstractFieldConnector
 
     @Override
     public void handleGeocode(String query) {
-        RpcProxy.create(LocationTextFieldServerRpc.class, this).geocode(query);
+        this.serverRpc.geocode(query);
     }
 
     @Override
@@ -108,5 +108,7 @@ public class LocationTextFieldConnector extends AbstractFieldConnector
     @Override
     public void onTextChange(String text) {
         getState().text = text;
+        if (text.isEmpty())
+            this.serverRpc.inputCleared();
     }
 }

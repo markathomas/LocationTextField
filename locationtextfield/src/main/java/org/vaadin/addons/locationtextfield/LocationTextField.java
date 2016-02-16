@@ -75,6 +75,7 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
         this.geocoderController = new DefaultGeocoderController<E>(locationProvider);
 
         final LocationTextFieldServerRpc rpc = new LocationTextFieldServerRpc() {
+            @Override
             public void geocode(String query) {
                 LocationTextField.this.geocode(query);
             }
@@ -84,6 +85,11 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
                 LocationTextField.this.setText(suggestion.getDisplayString());
                 E location = LocationTextField.this.items.get(suggestion.getId());
                 LocationTextField.this.fireLocationChanged(location);
+            }
+
+            @Override
+            public void inputCleared() {
+                reset();
             }
         };
         this.registerRpc(rpc, LocationTextFieldServerRpc.class);
@@ -223,11 +229,12 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
      */
     public void reset() {
         this.clearChoices();
-        this.setText("");
+        this.getState().text = "";
         this.updateProperty(null);
+        this.markAsDirty();
     }
 
-    private void clearChoices() {
+    void clearChoices() {
         getState().suggestions = Collections.emptyList();
         this.items.clear();
         markAsDirty();
@@ -255,8 +262,8 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
     protected void setText(String text, boolean geocodeIfDifferent) {
         if (!Objects.equals(getText(), text)) {
             this.getState().text = text;
+            clearChoices();
             if (geocodeIfDifferent && text.length() > this.getMinimumQueryCharacters()) {
-                clearChoices();
                 this.geocoderController.geocode(this, text);
             }
             markAsDirty();

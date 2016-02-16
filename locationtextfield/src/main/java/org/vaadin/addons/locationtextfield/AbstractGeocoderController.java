@@ -70,8 +70,8 @@ public class AbstractGeocoderController<E extends GeocodedLocation> implements S
      * @param results results of geocoding
      */
     protected void handleResults(LocationTextField<E> ltf, String query, Collection<E> results) {
-        ltf.reset();
-        ltf.setText(query);
+        ltf.clearChoices();
+        ltf.getState().text = query;
         Collection<E> sorted = this.sortResults(results);
         for (E option : sorted) {
             ltf.addSuggestion(option, option.getGeocodedAddress());
