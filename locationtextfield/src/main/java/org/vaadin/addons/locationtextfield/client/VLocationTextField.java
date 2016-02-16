@@ -93,10 +93,7 @@ public class VLocationTextField extends Composite implements KeyUpHandler, Focus
             } else {
                 // send event to the server side
                 String query = request.getQuery().trim();
-
-                if (query.length() >= getMinimumQueryCharacters()) {
-                    scheduleQuery(request.getQuery());
-                }
+                scheduleQuery(query);
             }
         }
     }

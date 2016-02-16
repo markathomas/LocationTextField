@@ -255,7 +255,7 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
     protected void setText(String text, boolean geocodeIfDifferent) {
         if (!Objects.equals(getText(), text)) {
             this.getState().text = text;
-            if (geocodeIfDifferent) {
+            if (geocodeIfDifferent && text.length() > this.getMinimumQueryCharacters()) {
                 clearChoices();
                 this.geocoderController.geocode(this, text);
             }
