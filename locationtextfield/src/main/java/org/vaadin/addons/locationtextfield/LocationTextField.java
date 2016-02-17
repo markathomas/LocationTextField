@@ -82,8 +82,8 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
 
             @Override
             public void locationSelected(GeocodedLocationSuggestion suggestion) {
-                LocationTextField.this.setText(suggestion.getDisplayString());
                 E location = LocationTextField.this.items.get(suggestion.getId());
+                LocationTextField.this.setText(suggestion.getDisplayString());
                 LocationTextField.this.fireLocationChanged(location);
             }
 
@@ -262,8 +262,8 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
     protected void setText(String text, boolean geocodeIfDifferent) {
         if (!Objects.equals(getText(), text)) {
             this.getState().text = text;
-            clearChoices();
             if (geocodeIfDifferent && text.length() > this.getMinimumQueryCharacters()) {
+                clearChoices();
                 this.geocoderController.geocode(this, text);
             }
             markAsDirty();
