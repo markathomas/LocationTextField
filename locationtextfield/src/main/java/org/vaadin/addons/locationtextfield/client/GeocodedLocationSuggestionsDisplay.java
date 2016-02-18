@@ -33,6 +33,7 @@ import java.util.Collection;
 public class GeocodedLocationSuggestionsDisplay extends SuggestBox.DefaultSuggestionDisplay {
 
     private final Widget widget;
+    private int gap = 2;
 
     public GeocodedLocationSuggestionsDisplay(Widget widget) {
         this.widget = widget;
@@ -65,7 +66,7 @@ public class GeocodedLocationSuggestionsDisplay extends SuggestBox.DefaultSugges
         Element selectedItem = querySelector(".v-locationtextfield .item-selected").getParentElement();
         Element suggestedMenu = getSuggestionMenu().getElement();  //parent
         if(selectedItem.getOffsetTop() + selectedItem.getOffsetHeight() >= suggestedMenu.getOffsetHeight()) {
-            suggestedMenu.setScrollTop(suggestedMenu.getScrollTop() + selectedItem.getOffsetHeight());
+            suggestedMenu.setScrollTop(suggestedMenu.getScrollTop() + selectedItem.getOffsetHeight() + gap);
         }
     }
 
@@ -74,7 +75,7 @@ public class GeocodedLocationSuggestionsDisplay extends SuggestBox.DefaultSugges
         Element selectedItem = querySelector(".v-locationtextfield .item-selected").getParentElement(); //child
         Element suggestedMenu = getSuggestionMenu().getElement();  //parent
         if(selectedItem.getOffsetTop() <= suggestedMenu.getScrollTop()) {
-            suggestedMenu.setScrollTop(suggestedMenu.getScrollTop() - selectedItem.getOffsetHeight());
+            suggestedMenu.setScrollTop(suggestedMenu.getScrollTop() - selectedItem.getOffsetHeight() - gap);
         }
     }
 
