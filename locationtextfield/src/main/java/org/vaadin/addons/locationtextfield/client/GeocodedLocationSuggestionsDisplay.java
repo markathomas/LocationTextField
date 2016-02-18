@@ -65,7 +65,6 @@ public class GeocodedLocationSuggestionsDisplay extends SuggestBox.DefaultSugges
         super.moveSelectionDown();
         Element selectedItem = querySelector(".v-locationtextfield .item-selected").getParentElement();
         Element suggestedMenu = getSuggestionMenu().getElement();  //parent
-        log("item offset top: " + selectedItem.getOffsetTop() + "Suggest menu offset Height: " + suggestedMenu.getOffsetHeight());
         if(selectedItem.getOffsetTop() + selectedItem.getOffsetHeight() >= suggestedMenu.getOffsetHeight()) {
             suggestedMenu.setScrollTop(suggestedMenu.getScrollTop() + selectedItem.getOffsetHeight() + gap);
         }
@@ -82,9 +81,5 @@ public class GeocodedLocationSuggestionsDisplay extends SuggestBox.DefaultSugges
 
     public final native Element querySelector(String selectors) /*-{
         return $doc.querySelector(selectors);
-    }-*/;
-
-    public final native void log(String msg) /*-{
-        return console.log(msg);
     }-*/;
 }
