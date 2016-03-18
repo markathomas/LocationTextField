@@ -170,6 +170,15 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
                 listener.valueChange(event);
             }
         }
+
+        this.afterLocationChanged(suggestion);
+    }
+
+    /**
+     * Hook method for subclasses to implement. Called after location has been changed
+     * @param suggestion the changed location
+     */
+    protected void afterLocationChanged(E suggestion) {
     }
 
     private void updateProperty(E suggestion) {
