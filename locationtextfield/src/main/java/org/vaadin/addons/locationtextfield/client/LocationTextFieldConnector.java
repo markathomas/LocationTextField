@@ -25,6 +25,7 @@ import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.ui.SuggestOracle;
 import com.vaadin.client.annotations.OnStateChange;
 import com.vaadin.client.communication.RpcProxy;
+import com.vaadin.client.communication.StateChangeEvent;
 import com.vaadin.client.ui.AbstractFieldConnector;
 import com.vaadin.shared.ui.Connect;
 
@@ -84,8 +85,9 @@ public class LocationTextFieldConnector extends AbstractFieldConnector
         getWidget().setEnabled(getState().enabled);
     }
 
-    @OnStateChange("text")
-    private void setText() {
+    @Override
+    public void onStateChanged(StateChangeEvent stateChangeEvent) {
+        super.onStateChanged(stateChangeEvent);
         getWidget().setDisplayedText(getState().text);
     }
 
