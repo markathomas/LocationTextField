@@ -22,7 +22,7 @@ package org.vaadin.addons.ltf.demo;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
 import com.vaadin.annotations.VaadinServletConfiguration;
-import com.vaadin.data.Property;
+import com.vaadin.data.HasValue;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.Button;
@@ -58,10 +58,9 @@ public class DemoUI extends UI
 
         final OpenStreetMapGeocoder geocoder = OpenStreetMapGeocoder.getInstance();
         geocoder.setLimit(25);
-        final LocationTextField<GeocodedLocation> ltf = new LocationTextField<GeocodedLocation>(geocoder, GeocodedLocation.class);
+        final LocationTextField<GeocodedLocation> ltf = new LocationTextField<GeocodedLocation>(geocoder);
         ltf.setCaption("Address: ");
         ltf.setWidth("100%");
-        ltf.setImmediate(true);
         ltf.setInputPrompt("<<Enter Address>>");
         //ltf.setAutoSelectionEnabled(false);
         vl.addComponent(ltf);
@@ -71,33 +70,26 @@ public class DemoUI extends UI
         vl.addComponent(lat);
         vl.addComponent(lon);
 
-        ltf.setRequired(true);
-        ltf.addLocationValueChangeListener(new Property.ValueChangeListener() {
-            public void valueChange(Property.ValueChangeEvent event) {
-                GeocodedLocation loc = (GeocodedLocation)event.getProperty().getValue();
-                if (loc != null) {
-                    lat.setValue("" + loc.getLat());
-                    lon.setValue("" + loc.getLon());
-                } else {
-                    lat.setValue("");
-                    lon.setValue("");
-                }
+        ltf.setRequiredIndicatorVisible(true);
+        ltf.setAutoSelectionEnabled(true);
+        ltf.addLocationValueChangeListener((HasValue.ValueChangeListener<GeocodedLocation>)event -> {
+            GeocodedLocation loc = event.getValue();
+            if (loc != null) {
+                lat.setValue("" + loc.getLat());
+                lon.setValue("" + loc.getLon());
+            } else {
+                lat.setValue("");
+                lon.setValue("");
             }
         });
 
-        Button b = new Button("New York City, NY", new Button.ClickListener() {
-            public void buttonClick(Button.ClickEvent event) {
-                ltf.geocode("New York City, NY");
-            }
-        });
+        Button b = new Button("New York City, NY", (Button.ClickListener)event -> ltf.geocode("New York City, NY"));
         vl.addComponent(b);
 
-        Button b2 = new Button("Reset LocationTextField", new Button.ClickListener() {
-            public void buttonClick(Button.ClickEvent event) {
-                ltf.reset();
-                lat.clear();
-                lon.clear();
-            }
+        Button b2 = new Button("Reset LocationTextField", (Button.ClickListener)event -> {
+            ltf.reset();
+            lat.clear();
+            lon.clear();
         });
         vl.addComponent(b2);
 

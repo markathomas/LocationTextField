@@ -20,8 +20,6 @@
 
 package org.vaadin.addons.locationtextfield;
 
-import com.vaadin.data.Property;
-import com.vaadin.data.util.ObjectProperty;
 import com.vaadin.ui.AbstractField;
 
 import java.util.ArrayList;
@@ -37,42 +35,33 @@ import org.vaadin.addons.locationtextfield.client.GeocodedLocationSuggestion;
 import org.vaadin.addons.locationtextfield.client.LocationTextFieldServerRpc;
 import org.vaadin.addons.locationtextfield.client.LocationTextFieldState;
 
-public class LocationTextField<E extends GeocodedLocation> extends AbstractField<String> {
+public class LocationTextField<E extends GeocodedLocation> extends AbstractField<E> {
 
     private static final long serialVersionUID = 6356456959417951791L;
 
-    private Class<E> typeClass;
-    private Property<E> property;
+    private E property;
     private GeocoderController<E> geocoderController;
     private final Map<Integer, E> items = new HashMap<Integer, E>();
-    private final Set<ValueChangeListener> locationValueChangeListeners = new HashSet<ValueChangeListener>();
+    private final Set<ValueChangeListener<E>> locationValueChangeListeners = new HashSet<>();
 
-    public LocationTextField(LocationProvider<E> locationProvider, Class<E> typeClass) {
-        this(locationProvider, typeClass, null, null, null);
+    public LocationTextField(LocationProvider<E> locationProvider) {
+        this(locationProvider, null, null);
     }
 
-    private LocationTextField(LocationProvider<E> locationProvider, Class<E> typeClass, E initialValue, Property<E> property,
-      String caption) {
+    private LocationTextField(LocationProvider<E> locationProvider, E initialValue, String caption) {
         if (locationProvider == null) {
             throw new IllegalArgumentException("locationProvider cannot be null");
         }
-        if (typeClass == null) {
-            throw new IllegalArgumentException("typeClass cannot be null");
-        }
 
-        this.typeClass = typeClass;
-
-        if (property == null) {
-            property = new ObjectProperty<E>(null, typeClass);
-        }
-        this.property = property;
+        this.property = initialValue;
 
         if (initialValue != null) {
             this.setLocation(initialValue);
         }
         this.setCaption(caption);
         this.setDelay(500);
-        this.geocoderController = new DefaultGeocoderController<E>(locationProvider);
+        this.geocoderController = new DefaultGeocoderController<>(locationProvider);
+
 
         final LocationTextFieldServerRpc rpc = new LocationTextFieldServerRpc() {
             @Override
@@ -96,7 +85,7 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
     }
 
     private LocationTextField(Builder<E> builder) {
-        this(builder.locationProvider, builder.typeClass, builder.initialValue, builder.property, builder.caption);
+        this(builder.locationProvider, builder.initialValue, builder.caption);
         if (builder.geocoderController != null) {
             setGeocoderController(builder.geocoderController);
         }
@@ -121,16 +110,10 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
             setMinimumQueryCharacters(builder.minimumQueryCharacters);
         }
         setAutoSelectionEnabled(builder.autoSelectEnabled);
-        setImmediate(builder.immediate);
     }
 
     public static <E extends GeocodedLocation> Builder<E> newBuilder() {
-        return new Builder<E>();
-    }
-
-    @Override
-    public Class<String> getType() {
-        return String.class;
+        return new Builder<>();
     }
 
     /**
@@ -151,22 +134,18 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
             return;
         }
 
-        this.updateProperty(suggestion);
+        E oldValue = this.property;
+        this.property = suggestion;
 
-        Set<ValueChangeListener> someListeners;
+        Set<ValueChangeListener<E>> someListeners;
         synchronized (this.locationValueChangeListeners) {
-            someListeners = new HashSet<ValueChangeListener>(this.locationValueChangeListeners);
+            someListeners = new HashSet<>(this.locationValueChangeListeners);
         }
 
         if (!someListeners.isEmpty()) {
-            final Property.ValueChangeEvent event = new ValueChangeEvent(this) {
-                @Override
-                public Property getProperty() {
-                    return LocationTextField.this.property;
-                }
-            };
+            final ValueChangeEvent<E> event = new ValueChangeEvent<>(this, oldValue, true);
 
-            for (ValueChangeListener listener : someListeners) {
+            for (ValueChangeListener<E> listener : someListeners) {
                 listener.valueChange(event);
             }
         }
@@ -181,18 +160,11 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
     protected void afterLocationChanged(E suggestion) {
     }
 
-    private void updateProperty(E suggestion) {
-        if (this.property == null) {
-            this.property = new ObjectProperty<E>(suggestion);
-        }
-        this.property.setValue(suggestion);
-    }
-
     /**
      * Adds a listener to receive changes to the selected location
      * @param listener a listener for changes to the selected location
      */
-    public void addLocationValueChangeListener(ValueChangeListener listener) {
+    public void addLocationValueChangeListener(ValueChangeListener<E> listener) {
         synchronized (this.locationValueChangeListeners) {
             this.locationValueChangeListeners.add(listener);
         }
@@ -202,7 +174,7 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
      * Removed a listener from receiving changes to the selected location
      * @param listener a listener for changes to the selected location
      */
-    public void removeLocationValueChangeListener(ValueChangeListener listener) {
+    public void removeLocationValueChangeListener(ValueChangeListener<E> listener) {
         synchronized (this.locationValueChangeListeners) {
             this.locationValueChangeListeners.remove(listener);
         }
@@ -225,12 +197,12 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
     public void setLocation(E location) {
         this.reset();
         if (location != null) {
-            this.updateProperty(location);
+            this.property = location;
             this.setText(location.getGeocodedAddress());
         }
     }
     public E getLocation() {
-        return this.property.getValue();
+        return this.property;
     }
 
     /**
@@ -239,7 +211,7 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
     public void reset() {
         this.clearChoices();
         this.getState().text = "";
-        this.updateProperty(null);
+        this.property = null;
         this.markAsDirty();
     }
 
@@ -294,6 +266,11 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
     }
 
     @Override
+    protected void doSetValue(E value) {
+        this.property = value;
+    }
+
+    @Override
     public LocationTextFieldState getState() {
         return (LocationTextFieldState)super.getState();
     }
@@ -303,11 +280,11 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
      * @return start delay in milliseconds
      */
     public int getDelay() {
-        return getState().delayMillis;
+        return this.getState().delayMillis;
     }
     public void setDelay(int delayMillis) {
-        getState().delayMillis = delayMillis;
-        markAsDirty();
+        this.getState().delayMillis = delayMillis;
+        this.markAsDirty();
     }
 
     /**
@@ -315,11 +292,11 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
      * @return configured tab index
      */
     public int getTabIndex() {
-        return getState().tabIndex;
+        return this.getState().tabIndex;
     }
     public void setTabIndex(int tabIdx) {
-        getState().tabIndex = tabIdx;
-        markAsDirty();
+        this.getState().tabIndex = tabIdx;
+        this.markAsDirty();
     }
 
     /**
@@ -327,16 +304,16 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
      * @return whether or not this field is enabled
      */
     public boolean isEnabled() {
-        return getState().enabled;
+        return this.getState().enabled;
     }
     public void setEnabled(boolean enabled) {
-        getState().enabled = enabled;
-        markAsDirty();
+        this.getState().enabled = enabled;
+        this.markAsDirty();
     }
 
     public void setInputPrompt(String inputPrompt) {
         this.getState().inputPrompt = inputPrompt;
-        markAsDirty();
+        this.markAsDirty();
     }
 
     /**
@@ -346,23 +323,26 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
      *   {@link GeocodedLocation#getDisplayString()}
      */
     public void addSuggestion(E id, String title) {
-        int index = getState().suggestions.size();
+        int index = this.getState().suggestions.size();
         this.items.put(index, id);
-        List<GeocodedLocationSuggestion> newSuggestionList = new ArrayList<GeocodedLocationSuggestion>(getState().suggestions);
+        List<GeocodedLocationSuggestion> newSuggestionList = new ArrayList<>(this.getState().suggestions);
         GeocodedLocationSuggestion suggestion = new GeocodedLocationSuggestion();
         suggestion.setId(index);
         suggestion.setDisplayString(title);
         newSuggestionList.add(suggestion);
-        getState().suggestions = newSuggestionList;
-        markAsDirty();
+        this.getState().suggestions = newSuggestionList;
+        this.markAsDirty();
+    }
+
+    @Override
+    public E getValue() {
+        return this.property;
     }
 
     public static final class Builder<E extends GeocodedLocation> {
 
-        private Class<E> typeClass;
         private E initialValue;
         private LocationProvider<E> locationProvider;
-        private Property<E> property;
         private GeocoderController<E> geocoderController;
         private String text;
         private String caption;
@@ -372,33 +352,18 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
         private boolean autoSelectEnabled = true;
         private String width;
         private String height;
-        private boolean immediate;
 
         private Builder() {
-        }
-
-        public Builder<E> withType(Class<E> typeClass) {
-            this.typeClass = typeClass;
-            return this;
         }
 
         @SuppressWarnings("unchecked")
         public Builder<E> withInitialValue(E initialValue) {
             this.initialValue = initialValue;
-            if (initialValue != null) {
-                this.property = new ObjectProperty<E>(initialValue);
-                this.typeClass = (Class<E>)initialValue.getClass();
-            }
             return this;
         }
 
         public Builder<E> withLocationProvider(LocationProvider<E> locationProvider) {
             this.locationProvider = locationProvider;
-            return this;
-        }
-
-        public Builder<E> withProperty(Property<E> property) {
-            this.property = property;
             return this;
         }
 
@@ -456,13 +421,8 @@ public class LocationTextField<E extends GeocodedLocation> extends AbstractField
             return this;
         }
 
-        public Builder<E> withImmediate(boolean immediate) {
-            this.immediate = immediate;
-            return this;
-        }
-
         public LocationTextField<E> build() {
-            return new LocationTextField<E>(this);
+            return new LocationTextField<>(this);
         }
     }
 }

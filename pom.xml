@@ -5,12 +5,26 @@
 	<groupId>org.vaadin.addons</groupId>
 	<artifactId>locationtextfield-root</artifactId>
 	<packaging>pom</packaging>
-	<version>2.1.7</version>
+	<version>3.0.0</version>
 	<name>LocationTextField Add-on Root Project</name>
 
 	<modules>
 		<module>locationtextfield</module>
 		<module>locationtextfield-demo</module>
 	</modules>
+
+    <repositories>
+        <repository>
+            <id>vaadin-prereleases</id>
+            <url>https://maven.vaadin.com/vaadin-prereleases</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>vaadin-prereleases</id>
+            <url>https://maven.vaadin.com/vaadin-prereleases</url>
+        </pluginRepository>
+    </pluginRepositories>
 
 </project>
