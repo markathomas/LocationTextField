@@ -23,6 +23,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -45,8 +46,9 @@ public abstract class URLConnectionGeocoder<T extends GeocodedLocation> implemen
         BufferedReader reader = null;
         try {
             String addr = getURL(address);
-            URLConnection con = new URL(addr).openConnection();
+            HttpURLConnection con = (HttpURLConnection)new URL(addr).openConnection();
             con.setDoOutput(true);
+            con.setFollowRedirects(true);
             con.connect();
             reader = new BufferedReader(new InputStreamReader(con.getInputStream(), getEncoding()));
             final StringBuilder builder = new StringBuilder();

@@ -37,7 +37,7 @@ public final class OpenStreetMapGeocoder extends URLConnectionGeocoder<GeocodedL
 
     private static final long serialVersionUID = -1577822453327050058L;
 
-    private static final String BASE_URL = "http://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=";
+    private static final String BASE_URL = "https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=";
 
     private static final OpenStreetMapGeocoder INSTANCE = new OpenStreetMapGeocoder();
 

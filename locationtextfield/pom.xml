@@ -24,7 +24,7 @@
     <groupId>org.vaadin.addons</groupId>
     <artifactId>locationtextfield</artifactId>
     <packaging>jar</packaging>
-    <version>3.0.0</version>
+    <version>3.0.1</version>
     <name>LocationTextField</name>
 
     <properties>
