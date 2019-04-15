@@ -46,6 +46,7 @@ public final class GoogleGeocoder extends URLConnectionGeocoder<GeocodedLocation
     private static final GoogleGeocoder INSTANCE = new GoogleGeocoder();
 
     private boolean useSecureConnection;
+    private String apiKey;
 
     private GoogleGeocoder() {
         // nuthin'
@@ -57,7 +58,7 @@ public final class GoogleGeocoder extends URLConnectionGeocoder<GeocodedLocation
 
     protected String getURL(String address) throws UnsupportedEncodingException {
         return (this.useSecureConnection ? SECURE_URL : INSECURE_URL) + "?address=" + URLEncoder.encode(address, "UTF-8")
-          + "&sensor=false";
+          + "&key=" + URLEncoder.encode(this.apiKey, "UTF-8");
     }
 
     protected Collection<GeocodedLocation> createLocations(String address, String input) throws GeocodingException {
@@ -148,5 +149,13 @@ public final class GoogleGeocoder extends URLConnectionGeocoder<GeocodedLocation
 
     public void setUseSecureConnection(boolean useSecureConnection) {
         this.useSecureConnection = useSecureConnection;
+    }
+
+    public String getApiKey() {
+        return this.apiKey;
+    }
+
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
     }
 }

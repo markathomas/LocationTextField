@@ -24,7 +24,7 @@
     <groupId>org.vaadin.addons</groupId>
     <artifactId>locationtextfield-demo</artifactId>
     <packaging>war</packaging>
-    <version>3.0.1</version>
+    <version>3.0.2</version>
     <name>LocationTextField Add-on Demo</name>
 
     <properties>

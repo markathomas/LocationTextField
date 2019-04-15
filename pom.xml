@@ -5,7 +5,7 @@
 	<groupId>org.vaadin.addons</groupId>
 	<artifactId>locationtextfield-root</artifactId>
 	<packaging>pom</packaging>
-	<version>3.0.0</version>
+	<version>3.0.2</version>
 	<name>LocationTextField Add-on Root Project</name>
 
 	<modules>
